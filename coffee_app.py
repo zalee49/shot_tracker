@@ -52,16 +52,17 @@ def get_saved_beans(shots):
     return seen
 
 
-st.markdown("""
-<div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
+bean_col, title_col = st.columns([0.08, 0.92])
+with bean_col:
+    st.markdown("""
     <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <ellipse cx="24" cy="24" rx="14" ry="20" fill="#6F4E37"/>
         <path d="M24 6 C29 13 29 21 24 28 C19 35 19 40 24 42"
               stroke="#3E1F00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
     </svg>
-    <h1 style="color: #3E1F00; font-family: Georgia, serif; margin: 0; white-space: nowrap;">Zach's Espresso Shot Tracker</h1>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+with title_col:
+    st.title("Zach's Espresso Shot Tracker")
 st.subheader("Log a New Shot")
 
 shots = load_data()
