@@ -57,12 +57,12 @@ st.markdown("""
     .stApp {
         background-color: #FDF6EC;
     }
-    h1, h2, h3 {
-        color: #3E1F00;
+    h1, h2, h3, h4, h5, h6 {
+        color: #3E1F00 !important;
         font-family: Georgia, serif;
     }
-    .stSubheader, .stMarkdown h2 {
-        color: #6F4E37;
+    p, label, div, span, .stMarkdown {
+        color: #3E1F00 !important;
     }
     .stButton > button {
         background-color: #6F4E37;
