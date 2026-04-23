@@ -1,40 +1,62 @@
 import streamlit as st
 import pandas as pd
-import os
+import requests
 from datetime import date
 
-DATA_FILE = "shot_log.csv"
+ROAST_LEVELS = ["Light", "Medium", "Medium-Dark", "Dark"]
+PROCESS_METHODS = ["Washed", "Natural", "Honey", "Other"]
 
-COLUMNS = [
-    "Date", "Bean Name", "Roaster", "Origin", "Roast Level",
-    "Process Method", "Roast Date", "Dose (g)", "Yield (g)",
-    "Brew Time (s)", "Grind Size", "Temperature (°C)", "Tasting Notes"
-]
+
+def get_headers():
+    key = st.secrets["SUPABASE_KEY"]
+    return {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+    }
+
+
+def get_url(path=""):
+    return f"{st.secrets['SUPABASE_URL']}/rest/v1/shots{path}"
 
 
 def load_data():
-    if os.path.exists(DATA_FILE):
-        return pd.read_csv(DATA_FILE)
-    return pd.DataFrame(columns=COLUMNS)
+    response = requests.get(
+        get_url("?order=id.desc"),
+        headers=get_headers()
+    )
+    return response.json()
 
 
-def save_data(df):
-    df.to_csv(DATA_FILE, index=False)
+def save_shot(row):
+    requests.post(
+        get_url(),
+        headers={**get_headers(), "Prefer": "return=minimal"},
+        json=row
+    )
 
 
-def get_saved_beans(df):
-    if df.empty:
-        return {}
-    bean_cols = ["Bean Name", "Roaster", "Origin", "Roast Level", "Process Method", "Roast Date"]
-    beans = df[bean_cols].drop_duplicates(subset=["Bean Name"]).set_index("Bean Name")
-    return beans.to_dict(orient="index")
+def delete_shot(shot_id):
+    requests.delete(
+        get_url(f"?id=eq.{shot_id}"),
+        headers=get_headers()
+    )
+
+
+def get_saved_beans(shots):
+    seen = {}
+    for shot in shots:
+        name = shot["bean_name"]
+        if name not in seen:
+            seen[name] = shot
+    return seen
 
 
 st.title("Espresso Shot Tracker")
 st.subheader("Log a New Shot")
 
-df = load_data()
-saved_beans = get_saved_beans(df)
+shots = load_data()
+saved_beans = get_saved_beans(shots)
 
 bean_options = ["-- New Bean --"] + list(saved_beans.keys())
 selected_bean = st.selectbox("Select a Bean or Add New", bean_options)
@@ -42,12 +64,12 @@ selected_bean = st.selectbox("Select a Bean or Add New", bean_options)
 if selected_bean != "-- New Bean --":
     bean_data = saved_beans[selected_bean]
     default_name = selected_bean
-    default_roaster = bean_data["Roaster"]
-    default_origin = bean_data["Origin"]
-    default_roast_level = bean_data["Roast Level"]
-    default_process = bean_data["Process Method"]
+    default_roaster = bean_data["roaster"]
+    default_origin = bean_data["origin"]
+    default_roast_level = bean_data["roast_level"]
+    default_process = bean_data["process_method"]
     try:
-        default_roast_date = date.fromisoformat(str(bean_data["Roast Date"]))
+        default_roast_date = date.fromisoformat(str(bean_data["roast_date"]))
     except Exception:
         default_roast_date = date.today()
 else:
@@ -58,19 +80,16 @@ else:
     default_process = "Washed"
     default_roast_date = date.today()
 
-roast_levels = ["Light", "Medium", "Medium-Dark", "Dark"]
-process_methods = ["Washed", "Natural", "Honey", "Other"]
-
 with st.form("shot_form"):
     st.markdown("**Bean Info**")
     col1, col2 = st.columns(2)
     with col1:
         bean_name = st.text_input("Bean Name", value=default_name, placeholder="e.g. Ethiopia Yirgacheffe")
         origin = st.text_input("Origin", value=default_origin, placeholder="e.g. Ethiopia, Yirgacheffe")
-        roast_level = st.selectbox("Roast Level", roast_levels, index=roast_levels.index(default_roast_level))
+        roast_level = st.selectbox("Roast Level", ROAST_LEVELS, index=ROAST_LEVELS.index(default_roast_level))
     with col2:
         roaster = st.text_input("Roaster", value=default_roaster, placeholder="e.g. Blue Bottle")
-        process_method = st.selectbox("Process Method", process_methods, index=process_methods.index(default_process))
+        process_method = st.selectbox("Process Method", PROCESS_METHODS, index=PROCESS_METHODS.index(default_process))
         roast_date = st.date_input("Roast Date", value=default_roast_date)
 
     st.markdown("---")
@@ -90,59 +109,57 @@ with st.form("shot_form"):
     submitted = st.form_submit_button("Log Shot")
 
 if submitted:
-    df = load_data()
-    new_row = {
-        "Date": date.today().strftime("%Y-%m-%d"),
-        "Bean Name": bean_name,
-        "Roaster": roaster,
-        "Origin": origin,
-        "Roast Level": roast_level,
-        "Process Method": process_method,
-        "Roast Date": roast_date.strftime("%Y-%m-%d"),
-        "Dose (g)": dose,
-        "Yield (g)": yield_,
-        "Brew Time (s)": brew_time,
-        "Grind Size": grind_size,
-        "Temperature (°C)": temperature,
-        "Tasting Notes": tasting_notes,
-    }
-    df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
-    save_data(df)
+    save_shot({
+        "date": date.today().strftime("%Y-%m-%d"),
+        "bean_name": bean_name,
+        "roaster": roaster,
+        "origin": origin,
+        "roast_level": roast_level,
+        "process_method": process_method,
+        "roast_date": roast_date.strftime("%Y-%m-%d"),
+        "dose": dose,
+        "yield": yield_,
+        "brew_time": brew_time,
+        "grind_size": grind_size,
+        "temperature": temperature,
+        "tasting_notes": tasting_notes,
+    })
     st.success("Shot logged successfully!")
+    st.experimental_rerun()
 
 st.markdown("---")
 st.subheader("Shot History")
 
-df = load_data()
-
-if df.empty:
+if not shots:
     st.info("No shots logged yet. Fill in the form above to log your first shot!")
 else:
     header = st.columns([1.2, 1.8, 0.8, 0.8, 0.8, 0.8, 0.6])
     for col, label in zip(header, ["Date", "Bean", "Dose", "Yield", "Time", "Grind", ""]):
         col.markdown(f"**{label}**")
 
-    for orig_idx, row in df[::-1].iterrows():
+    for shot in shots:
         cols = st.columns([1.2, 1.8, 0.8, 0.8, 0.8, 0.8, 0.6])
-        cols[0].write(row["Date"])
-        cols[1].write(row["Bean Name"])
-        cols[2].write(f"{row['Dose (g)']}g")
-        cols[3].write(f"{row['Yield (g)']}g")
-        cols[4].write(f"{row['Brew Time (s)']}s")
-        cols[5].write(str(row["Grind Size"]))
-        if cols[6].button("Delete", key=f"del_{orig_idx}"):
-            df = df.drop(index=orig_idx).reset_index(drop=True)
-            save_data(df)
+        cols[0].write(shot["date"])
+        cols[1].write(shot["bean_name"])
+        cols[2].write(f"{shot['dose']}g")
+        cols[3].write(f"{shot['yield']}g")
+        cols[4].write(f"{shot['brew_time']}s")
+        cols[5].write(str(shot["grind_size"]))
+        if cols[6].button("Delete", key=f"del_{shot['id']}"):
+            delete_shot(shot["id"])
             st.experimental_rerun()
 
     st.markdown("---")
     st.subheader("Trends")
 
+    df = pd.DataFrame(shots)
+    df = df[::-1].reset_index(drop=True)
+
     col5, col6 = st.columns(2)
     with col5:
         st.markdown("**Brew Ratio Over Time** (Yield / Dose)")
-        df["Brew Ratio"] = df["Yield (g)"] / df["Dose (g)"]
+        df["Brew Ratio"] = df["yield"] / df["dose"]
         st.line_chart(df["Brew Ratio"])
     with col6:
         st.markdown("**Brew Time Over Time**")
-        st.line_chart(df["Brew Time (s)"])
+        st.line_chart(df["brew_time"])
