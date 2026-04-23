@@ -96,7 +96,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("Espresso Shot Tracker")
+st.title("Zach's Espresso Shot Tracker")
 st.subheader("Log a New Shot")
 
 shots = load_data()
