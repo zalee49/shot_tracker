@@ -134,7 +134,8 @@ if not shots:
     st.info("No shots logged yet. Fill in the form above to log your first shot!")
 else:
     for shot in shots:
-        label = f"{shot['date']} — {shot['bean_name']}  |  {shot['dose']}g in · {shot['yield']}g out · {shot['brew_time']}s"
+        display_date = date.fromisoformat(shot['date']).strftime("%m/%d/%y")
+        label = f"{display_date} — {shot['bean_name']}  |  {shot['dose']}g in · {shot['yield']}g out · {shot['brew_time']}s"
         with st.expander(label):
             col1, col2 = st.columns(2)
             with col1:
