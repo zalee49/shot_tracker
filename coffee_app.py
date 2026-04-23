@@ -133,21 +133,24 @@ st.subheader("Shot History")
 if not shots:
     st.info("No shots logged yet. Fill in the form above to log your first shot!")
 else:
-    header = st.columns([1.2, 1.8, 0.8, 0.8, 0.8, 0.8, 0.6])
-    for col, label in zip(header, ["Date", "Bean", "Dose", "Yield", "Time", "Grind", ""]):
-        col.markdown(f"**{label}**")
-
     for shot in shots:
-        cols = st.columns([1.2, 1.8, 0.8, 0.8, 0.8, 0.8, 0.6])
-        cols[0].write(shot["date"])
-        cols[1].write(shot["bean_name"])
-        cols[2].write(f"{shot['dose']}g")
-        cols[3].write(f"{shot['yield']}g")
-        cols[4].write(f"{shot['brew_time']}s")
-        cols[5].write(str(shot["grind_size"]))
-        if cols[6].button("Delete", key=f"del_{shot['id']}"):
-            delete_shot(shot["id"])
-            st.rerun()
+        label = f"{shot['date']} — {shot['bean_name']}  |  {shot['dose']}g in · {shot['yield']}g out · {shot['brew_time']}s"
+        with st.expander(label):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"**Roaster:** {shot['roaster']}")
+                st.write(f"**Origin:** {shot['origin']}")
+                st.write(f"**Roast Level:** {shot['roast_level']}")
+                st.write(f"**Process Method:** {shot['process_method']}")
+                st.write(f"**Roast Date:** {shot['roast_date']}")
+            with col2:
+                st.write(f"**Grind Size:** {shot['grind_size']}")
+                st.write(f"**Temperature:** {shot['temperature']}°C")
+                st.write(f"**Brew Ratio:** {shot['yield'] / shot['dose']:.2f}:1")
+            st.write(f"**Tasting Notes:** {shot['tasting_notes']}")
+            if st.button("Delete", key=f"del_{shot['id']}"):
+                delete_shot(shot["id"])
+                st.rerun()
 
     st.markdown("---")
     st.subheader("Trends")
