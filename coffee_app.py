@@ -125,7 +125,7 @@ if submitted:
         "tasting_notes": tasting_notes,
     })
     st.success("Shot logged successfully!")
-    st.experimental_rerun()
+    st.rerun()
 
 st.markdown("---")
 st.subheader("Shot History")
@@ -147,7 +147,7 @@ else:
         cols[5].write(str(shot["grind_size"]))
         if cols[6].button("Delete", key=f"del_{shot['id']}"):
             delete_shot(shot["id"])
-            st.experimental_rerun()
+            st.rerun()
 
     st.markdown("---")
     st.subheader("Trends")
