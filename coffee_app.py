@@ -52,6 +52,50 @@ def get_saved_beans(shots):
     return seen
 
 
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #FDF6EC;
+    }
+    h1, h2, h3 {
+        color: #3E1F00;
+        font-family: Georgia, serif;
+    }
+    .stSubheader, .stMarkdown h2 {
+        color: #6F4E37;
+    }
+    .stButton > button {
+        background-color: #6F4E37;
+        color: #FDF6EC;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+    .stButton > button:hover {
+        background-color: #3E1F00;
+        color: #FDF6EC;
+    }
+    .stForm {
+        background-color: #F5E6D3;
+        border-radius: 10px;
+        padding: 16px;
+    }
+    .stExpander {
+        background-color: #F5E6D3;
+        border: 1px solid #C8A882;
+        border-radius: 8px;
+    }
+    .stSelectbox label, .stTextInput label, .stNumberInput label,
+    .stTextArea label, .stDateInput label {
+        color: #3E1F00;
+        font-weight: bold;
+    }
+    hr {
+        border-color: #C8A882;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("Espresso Shot Tracker")
 st.subheader("Log a New Shot")
 
