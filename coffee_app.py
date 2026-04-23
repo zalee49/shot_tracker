@@ -59,7 +59,7 @@ st.markdown("""
         <path d="M24 6 C29 13 29 21 24 28 C19 35 19 40 24 42"
               stroke="#3E1F00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
     </svg>
-    <h1 style="color: #3E1F00; font-family: Georgia, serif; margin: 0;">Zach's Espresso Shot Tracker</h1>
+    <h1 style="color: #3E1F00; font-family: Georgia, serif; margin: 0; white-space: nowrap;">Zach's Espresso Shot Tracker</h1>
 </div>
 """, unsafe_allow_html=True)
 st.subheader("Log a New Shot")
