@@ -66,14 +66,21 @@ st.markdown("""
     }
     .stButton > button {
         background-color: #6F4E37;
-        color: #FDF6EC;
+        color: #FFFFFF !important;
         border: none;
         border-radius: 6px;
         font-weight: bold;
     }
     .stButton > button:hover {
         background-color: #3E1F00;
-        color: #FDF6EC;
+        color: #FFFFFF !important;
+    }
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: #FFFFFF;
+        color: #3E1F00 !important;
+    }
+    .stSelectbox span {
+        color: #3E1F00 !important;
     }
     .stForm {
         background-color: #F5E6D3;
