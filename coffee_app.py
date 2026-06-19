@@ -376,6 +376,18 @@ hr {
 }
 
 @media (max-width: 640px) {
+    header[data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    .stDeployButton {
+        display: none !important;
+    }
+
+    [data-testid="stAppViewContainer"] > section.main {
+        padding-top: 0 !important;
+    }
+
     .main .block-container {
         padding-top: 1rem;
         padding-bottom: 2rem;
