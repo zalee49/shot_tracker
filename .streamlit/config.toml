@@ -1,6 +1,10 @@
 [theme]
-primaryColor = "#C8956C"
-backgroundColor = "#0F0B09"
-secondaryBackgroundColor = "#1A1108"
-textColor = "#F2E8DF"
+primaryColor = "#2383E2"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F7F6F3"
+textColor = "#37352F"
 font = "sans serif"
+base = "light"
+
+[client]
+toolbarMode = "viewer"

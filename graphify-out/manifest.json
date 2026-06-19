@@ -1,0 +1,17 @@
+{
+  "coffee_app.py": {
+    "mtime": 1781872990.948312,
+    "ast_hash": "846f15d1a9eb7f6706ae0a917287d8fc",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1781833101.9405875,
+    "ast_hash": "d3f53dd8129412adf326f3356f977ee4",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1781833036.012943,
+    "ast_hash": "a77d8feb541b0e70c0331132f2cbded3",
+    "semantic_hash": ""
+  }
+}
