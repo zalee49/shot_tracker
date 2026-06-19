@@ -74,6 +74,13 @@ def fmt(value):
     return int(value) if value == int(value) else value
 
 
+def safe_index(options, value, default=0):
+    try:
+        return options.index(value)
+    except ValueError:
+        return default
+
+
 def ratio_flag(yield_, dose, target):
     if not dose:
         return ""
@@ -133,33 +140,6 @@ st.set_page_config(
 
 if "target_ratio" not in st.session_state:
     st.session_state.target_ratio = 2.0
-
-with st.sidebar:
-    st.markdown(
-        f"""
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;">
-            <img src="data:image/svg+xml;base64,{base64.b64encode(COFFEE_SVG.format(size=32).encode()).decode()}" width="32" height="32" style="flex-shrink:0;">
-            <div style="font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;color:#37352F;">
-                Espresso Tracker
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown('<div class="sidebar-label">Settings</div>', unsafe_allow_html=True)
-    st.session_state.target_ratio = st.number_input(
-        "Target Brew Ratio",
-        min_value=1.0,
-        max_value=4.0,
-        step=0.1,
-        value=st.session_state.target_ratio,
-        help="A 1:2 ratio means 18g dose produces 36g yield",
-    )
-    st.caption("Yield ÷ Dose")
-    st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
-    quick_mode = st.checkbox("Quick Log Mode", value=True)
-
-target_ratio = st.session_state.target_ratio
 
 st.html("""
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -492,6 +472,9 @@ st.markdown(
 shots = load_data()
 saved_beans = get_saved_beans(shots)
 
+if "quick_mode" not in st.session_state:
+    st.session_state.quick_mode = bool(saved_beans)
+
 if shots:
     rated = [s["rating"] for s in shots if s.get("rating")]
     avg_rating_display = (
@@ -512,6 +495,26 @@ if shots:
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown('<div class="section-header">Log a New Shot</div>', unsafe_allow_html=True)
+
+settings_col1, settings_col2 = st.columns(2)
+with settings_col1:
+    st.session_state.quick_mode = st.checkbox(
+        "Quick Log Mode",
+        value=st.session_state.quick_mode,
+        help="When a saved bean is selected, only show shot fields.",
+    )
+with settings_col2:
+    st.session_state.target_ratio = st.number_input(
+        "Target Brew Ratio",
+        min_value=1.0,
+        max_value=4.0,
+        step=0.1,
+        value=st.session_state.target_ratio,
+        help="A 1:2 ratio means 18g dose produces 36g yield (yield ÷ dose).",
+    )
+
+quick_mode = st.session_state.quick_mode
+target_ratio = st.session_state.target_ratio
 
 bean_options = ["-- New Bean --"] + list(saved_beans.keys())
 selected_bean = st.selectbox("Select Bean", bean_options)
@@ -535,76 +538,87 @@ else:
     default_process = "Washed"
     default_roast_date = date.today()
 
-if quick_mode and not default_name:
-    st.warning("Select a bean above to use Quick Log Mode, or open the menu (top-left) and turn off Quick Log Mode to log a new bean.")
-else:
-    with st.container(border=True):
-        with st.form("shot_form"):
-            if not quick_mode:
-                st.markdown('<div class="subsection-label">Bean Info</div>', unsafe_allow_html=True)
-                col1, col2 = st.columns(2)
-                with col1:
-                    bean_name = st.text_input("Bean Name", value=default_name, placeholder="e.g. Ethiopia Yirgacheffe")
-                    origin = st.text_input("Origin", value=default_origin, placeholder="e.g. Ethiopia, Yirgacheffe")
-                    roast_date = st.date_input("Roast Date", value=default_roast_date)
-                with col2:
-                    roaster = st.text_input("Roaster", value=default_roaster, placeholder="e.g. Blue Bottle")
-                    roast_level = st.selectbox("Roast Level", ROAST_LEVELS, index=ROAST_LEVELS.index(default_roast_level))
-                    process_method = st.selectbox("Process Method", PROCESS_METHODS, index=PROCESS_METHODS.index(default_process))
-                st.markdown('<div class="subsection-label">Shot Parameters</div>', unsafe_allow_html=True)
-            else:
-                bean_name = default_name
-                roaster = default_roaster
-                origin = default_origin
-                roast_level = default_roast_level
-                process_method = default_process
-                roast_date = default_roast_date
+is_new_bean = selected_bean == "-- New Bean --"
+show_bean_fields = is_new_bean or not quick_mode
 
-            row1_col1, row1_col2 = st.columns(2)
-            with row1_col1:
-                dose = st.number_input("Dose (g)", min_value=0.0, max_value=30.0, step=0.1, value=18.0)
-            with row1_col2:
-                yield_ = st.number_input("Yield (g)", min_value=0.0, max_value=100.0, step=0.1, value=36.0)
+if quick_mode and not is_new_bean:
+    st.caption("Quick Log: using saved bean details. Turn off Quick Log Mode to edit them.")
 
-            row2_col1, row2_col2 = st.columns(2)
-            with row2_col1:
-                brew_time = st.number_input("Brew Time (s)", min_value=0, max_value=120, step=1, value=28)
-            with row2_col2:
-                temperature = st.number_input("Temperature (°C)", min_value=80.0, max_value=100.0, step=0.5, value=93.0)
+with st.container(border=True):
+    with st.form("shot_form"):
+        if show_bean_fields:
+            st.markdown('<div class="subsection-label">Bean Info</div>', unsafe_allow_html=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                bean_name = st.text_input("Bean Name", value=default_name, placeholder="e.g. Ethiopia Yirgacheffe")
+                origin = st.text_input("Origin", value=default_origin, placeholder="e.g. Ethiopia, Yirgacheffe")
+                roast_date = st.date_input("Roast Date", value=default_roast_date)
+            with col2:
+                roaster = st.text_input("Roaster", value=default_roaster, placeholder="e.g. Blue Bottle")
+                roast_level = st.selectbox(
+                    "Roast Level",
+                    ROAST_LEVELS,
+                    index=safe_index(ROAST_LEVELS, default_roast_level),
+                )
+                process_method = st.selectbox(
+                    "Process Method",
+                    PROCESS_METHODS,
+                    index=safe_index(PROCESS_METHODS, default_process),
+                )
+            st.markdown('<div class="subsection-label">Shot Parameters</div>', unsafe_allow_html=True)
+        else:
+            bean_name = default_name
+            roaster = default_roaster
+            origin = default_origin
+            roast_level = default_roast_level
+            process_method = default_process
+            roast_date = default_roast_date
 
-            row3_col1, row3_col2 = st.columns(2)
-            with row3_col1:
-                grind_size = st.text_input("Grind Size", placeholder="e.g. 11, or 2.5 turns")
-            with row3_col2:
-                grind_direction = st.selectbox("Grind Direction vs Last Shot", GRIND_DIRECTIONS)
+        row1_col1, row1_col2 = st.columns(2)
+        with row1_col1:
+            dose = st.number_input("Dose (g)", min_value=0.0, max_value=30.0, step=0.1, value=18.0)
+        with row1_col2:
+            yield_ = st.number_input("Yield (g)", min_value=0.0, max_value=100.0, step=0.1, value=36.0)
 
-            rating = st.select_slider("Rating", options=[1, 2, 3, 4, 5], value=3)
-            tasting_notes = st.text_area("Tasting Notes", placeholder="e.g. Bright acidity, notes of blueberry...")
+        row2_col1, row2_col2 = st.columns(2)
+        with row2_col1:
+            brew_time = st.number_input("Brew Time (s)", min_value=0, max_value=120, step=1, value=28)
+        with row2_col2:
+            temperature = st.number_input("Temperature (°C)", min_value=80.0, max_value=100.0, step=0.5, value=93.0)
 
-            submitted = st.form_submit_button("Log Shot", use_container_width=True)
+        row3_col1, row3_col2 = st.columns(2)
+        with row3_col1:
+            grind_size = st.text_input("Grind Size", placeholder="e.g. 11, or 2.5 turns")
+        with row3_col2:
+            grind_direction = st.selectbox("Grind Direction vs Last Shot", GRIND_DIRECTIONS)
 
-    if submitted:
-        save_shot({
-            "date": date.today().strftime("%Y-%m-%d"),
-            "bean_name": bean_name,
-            "roaster": roaster,
-            "origin": origin,
-            "roast_level": roast_level,
-            "process_method": process_method,
-            "roast_date": roast_date.strftime("%Y-%m-%d"),
-            "dose": dose,
-            "yield": yield_,
-            "brew_time": brew_time,
-            "grind_size": grind_size,
-            "grind_direction": grind_direction,
-            "temperature": temperature,
-            "rating": rating,
-            "tasting_notes": tasting_notes or "",
-        })
-        ratio = yield_ / dose if dose else 0
-        flag = ratio_flag(yield_, dose, target_ratio)
-        st.success(f"Shot logged! Brew ratio: {ratio:.2f}:1 — {flag}")
-        st.rerun()
+        rating = st.select_slider("Rating", options=[1, 2, 3, 4, 5], value=3)
+        tasting_notes = st.text_area("Tasting Notes", placeholder="e.g. Bright acidity, notes of blueberry...")
+
+        submitted = st.form_submit_button("Log Shot", use_container_width=True)
+
+if submitted:
+    save_shot({
+        "date": date.today().strftime("%Y-%m-%d"),
+        "bean_name": bean_name,
+        "roaster": roaster,
+        "origin": origin,
+        "roast_level": roast_level,
+        "process_method": process_method,
+        "roast_date": roast_date.strftime("%Y-%m-%d"),
+        "dose": dose,
+        "yield": yield_,
+        "brew_time": brew_time,
+        "grind_size": grind_size,
+        "grind_direction": grind_direction,
+        "temperature": temperature,
+        "rating": rating,
+        "tasting_notes": tasting_notes or "",
+    })
+    ratio = yield_ / dose if dose else 0
+    flag = ratio_flag(yield_, dose, target_ratio)
+    st.success(f"Shot logged! Brew ratio: {ratio:.2f}:1 — {flag}")
+    st.rerun()
 
 st.markdown('<div class="section-header">Shot History</div>', unsafe_allow_html=True)
 

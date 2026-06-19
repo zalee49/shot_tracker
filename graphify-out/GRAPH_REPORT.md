@@ -1,16 +1,16 @@
 # Graph Report - shot_tracker  (2026-06-19)
 
 ## Corpus Check
-- 3 files · ~2,173 words
+- 3 files · ~2,414 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 22 nodes · 25 edges · 4 communities
+- 23 nodes · 26 edges · 4 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ae1065e2`
+- Built from commit: `16ab6bf0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -54,9 +54,9 @@ Nodes (5): delete_shot(), get_headers(), get_url(), load_data(), save_shot()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `get_headers()` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Why does `get_url()` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **Why does `load_data()` connect `Community 2` to `Community 0`?**
   _High betweenness centrality (0.001) - this node is a cross-community bridge._
 - **What connects `What this is`, `Commands`, `Secrets` to the rest of the system?**
