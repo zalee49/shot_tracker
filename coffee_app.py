@@ -174,9 +174,20 @@ h1, h2, h3, h4, h5, h6 {
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 #MainMenu,
-footer {
+footer,
+[data-testid="stFooter"],
+[data-testid="stBottom"],
+[data-testid="stBottomBlockContainer"],
+[class*="viewerBadge"],
+[class*="embeddedAppMetaInfoBar"],
+[class*="AppMetaInfoBar"] {
+    display: none !important;
     visibility: hidden !important;
     height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
     position: fixed !important;
 }
 .stDeployButton { display: none !important; }
@@ -390,7 +401,7 @@ hr {
 
     .main .block-container {
         padding-top: 1rem;
-        padding-bottom: 2rem;
+        padding-bottom: calc(2rem + 52px);
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
@@ -464,8 +475,35 @@ hr {
     input[type="text"], input[type="number"], textarea, select {
         font-size: 16px !important;
     }
+
+    .stApp::after {
+        content: "";
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 52px;
+        background: var(--notion-bg);
+        z-index: 999999;
+        pointer-events: none;
+    }
 }
 </style>
+<script>
+(function () {
+    function hideBranding() {
+        document.querySelectorAll(
+            'footer, [data-testid="stFooter"], [data-testid="stBottom"], ' +
+            '[data-testid="stBottomBlockContainer"], [class*="viewerBadge"], ' +
+            '[class*="embeddedAppMetaInfoBar"], [class*="AppMetaInfoBar"]'
+        ).forEach(function (el) {
+            el.style.setProperty("display", "none", "important");
+        });
+    }
+    hideBranding();
+    new MutationObserver(hideBranding).observe(document.body, { childList: true, subtree: true });
+})();
+</script>
 """)
 
 st.markdown(
