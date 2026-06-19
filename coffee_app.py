@@ -76,20 +76,159 @@ def ratio_flag(yield_, dose, target):
         return f"Under by {abs(diff):.2f} — try more yield or less dose"
 
 
+# ── Styles & Fonts ────────────────────────────────────────────────────────────
+st.html("""
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html, body, [class*="css"] { font-family: 'Inter', sans-serif !important; }
+h1, h2, h3, h4 { font-family: 'Playfair Display', serif !important; }
+
+.main .block-container { padding-top: 1.5rem; max-width: 860px; }
+
+input[type="text"], input[type="number"], textarea, select {
+    background-color: #1A1108 !important;
+    border: 1px solid #3D2E24 !important;
+    border-radius: 8px !important;
+    color: #F2E8DF !important;
+    transition: border-color 0.2s ease !important;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+    border-color: #C8956C !important;
+    box-shadow: 0 0 0 2px rgba(200,149,108,0.15) !important;
+}
+
+[data-testid="stExpander"] {
+    background-color: #1A1108 !important;
+    border: 1px solid #3D2E24 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+    margin-bottom: 8px !important;
+    overflow: hidden !important;
+}
+[data-testid="stExpander"] summary {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    padding: 14px 16px !important;
+}
+
+[data-testid="stButton"] button {
+    background: linear-gradient(135deg, #C8956C, #A0704A) !important;
+    color: #0F0B09 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(200,149,108,0.3) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+[data-testid="stButton"] button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(200,149,108,0.4) !important;
+}
+[data-testid="stFormSubmitButton"] button {
+    background: linear-gradient(135deg, #C8956C, #A0704A) !important;
+    color: #0F0B09 !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    border: none !important;
+}
+
+hr {
+    border: none !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, #3D2E24, transparent) !important;
+    margin: 1.5rem 0 !important;
+}
+
+.section-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #F2E8DF;
+    border-left: 3px solid #C8956C;
+    padding-left: 12px;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #1E1510, #231A12);
+    border: 1px solid #3D2E24;
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+}
+.stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #C8956C;
+    line-height: 1.1;
+}
+.stat-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #9A8070;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    margin-right: 6px;
+    margin-bottom: 8px;
+}
+.badge-roast { background: rgba(200,149,108,0.15); color: #C8956C; border: 1px solid rgba(200,149,108,0.3); }
+.badge-process { background: rgba(100,160,150,0.15); color: #7EC8BE; border: 1px solid rgba(100,160,150,0.3); }
+
+[data-testid="stAlert"] { border-radius: 8px !important; }
+</style>
+""")
+
+
 # ── Header ───────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: nowrap;">
-    <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
-        <ellipse cx="24" cy="24" rx="14" ry="20" fill="#6F4E37"/>
+<div style="background:linear-gradient(135deg,#1E1510 0%,#0F0B09 100%);border-bottom:1px solid #3D2E24;border-radius:12px;padding:28px 24px 20px;margin-bottom:8px;display:flex;align-items:center;gap:20px;">
+    <svg width="64" height="64" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+        <ellipse cx="24" cy="24" rx="14" ry="20" fill="#C8956C"/>
         <path d="M24 6 C29 13 29 21 24 28 C19 35 19 40 24 42"
-              stroke="#3E1F00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              stroke="#7A4E2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
     </svg>
-    <span style="font-size: 2.2rem; font-weight: bold; color: #3E1F00; font-family: Georgia, serif; white-space: nowrap;">Zach's Espresso Shot Tracker</span>
+    <div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.4rem;font-weight:700;line-height:1.1;background:linear-gradient(135deg,#C8956C 0%,#E8C9A0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Zach's Espresso Tracker</div>
+        <div style="font-family:'Inter',sans-serif;font-size:0.8rem;color:#9A8070;margin-top:6px;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;">Track · Taste · Dial In</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
 shots = load_data()
 saved_beans = get_saved_beans(shots)
+
+# ── Stats Bar ─────────────────────────────────────────────────────────────────
+if shots:
+    rated = [s["rating"] for s in shots if s.get("rating")]
+    avg_rating_display = (
+        "★" * round(sum(rated) / len(rated)) + "☆" * (5 - round(sum(rated) / len(rated)))
+        if rated else "—"
+    )
+    ratios = [s["yield"] / s["dose"] for s in shots if s.get("dose")]
+    avg_ratio = f"{sum(ratios)/len(ratios):.2f}:1" if ratios else "—"
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{len(shots)}</div><div class="stat-label">Shots Logged</div></div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{avg_rating_display}</div><div class="stat-label">Avg Rating</div></div>', unsafe_allow_html=True)
+    with col3:
+        st.markdown(f'<div class="stat-card"><div class="stat-value">{avg_ratio}</div><div class="stat-label">Avg Brew Ratio</div></div>', unsafe_allow_html=True)
 
 # ── Settings ─────────────────────────────────────────────────────────────────
 with st.expander("Settings"):
@@ -107,7 +246,7 @@ st.markdown("---")
 
 # ── Log Mode ─────────────────────────────────────────────────────────────────
 quick_mode = st.checkbox("Quick Log Mode", value=True)
-st.subheader("Log a New Shot")
+st.markdown('<div class="section-header">Log a New Shot</div>', unsafe_allow_html=True)
 
 bean_options = ["-- New Bean --"] + list(saved_beans.keys())
 selected_bean = st.selectbox("Select Bean", bean_options)
@@ -137,12 +276,15 @@ else:
     with st.form("shot_form"):
         if not quick_mode:
             st.markdown("**Bean Info**")
-            bean_name = st.text_input("Bean Name", value=default_name, placeholder="e.g. Ethiopia Yirgacheffe")
-            roaster = st.text_input("Roaster", value=default_roaster, placeholder="e.g. Blue Bottle")
-            origin = st.text_input("Origin", value=default_origin, placeholder="e.g. Ethiopia, Yirgacheffe")
-            roast_level = st.selectbox("Roast Level", ROAST_LEVELS, index=ROAST_LEVELS.index(default_roast_level))
-            process_method = st.selectbox("Process Method", PROCESS_METHODS, index=PROCESS_METHODS.index(default_process))
-            roast_date = st.date_input("Roast Date", value=default_roast_date)
+            col1, col2 = st.columns(2)
+            with col1:
+                bean_name = st.text_input("Bean Name", value=default_name, placeholder="e.g. Ethiopia Yirgacheffe")
+                origin = st.text_input("Origin", value=default_origin, placeholder="e.g. Ethiopia, Yirgacheffe")
+                roast_date = st.date_input("Roast Date", value=default_roast_date)
+            with col2:
+                roaster = st.text_input("Roaster", value=default_roaster, placeholder="e.g. Blue Bottle")
+                roast_level = st.selectbox("Roast Level", ROAST_LEVELS, index=ROAST_LEVELS.index(default_roast_level))
+                process_method = st.selectbox("Process Method", PROCESS_METHODS, index=PROCESS_METHODS.index(default_process))
             st.markdown("---")
             st.markdown("**Shot Parameters**")
         else:
@@ -189,7 +331,7 @@ else:
 
 # ── Shot History ──────────────────────────────────────────────────────────────
 st.markdown("---")
-st.subheader("Shot History")
+st.markdown('<div class="section-header">Shot History</div>', unsafe_allow_html=True)
 
 if not shots:
     st.info("No shots logged yet. Fill in the form above to log your first shot!")
@@ -205,20 +347,25 @@ else:
             f"{shot['brew_time']}s · {rating_stars}"
         )
         with st.expander(label):
+            st.markdown(
+                f'<span class="badge badge-roast">{shot["roast_level"]}</span>'
+                f'<span class="badge badge-process">{shot["process_method"]}</span>',
+                unsafe_allow_html=True
+            )
             st.markdown(f"**Brew Ratio:** {ratio:.2f}:1 — {flag}")
             st.markdown(f"**Grind Size:** {shot['grind_size'] or '—'}  |  **Direction:** {shot.get('grind_direction') or '—'}")
             st.markdown(f"**Temperature:** {shot['temperature']}°C")
             st.markdown(f"**Tasting Notes:** {shot.get('tasting_notes') or '—'}")
             st.markdown("---")
             st.markdown(f"**Roaster:** {shot['roaster'] or '—'}  |  **Origin:** {shot['origin'] or '—'}")
-            st.markdown(f"**Roast Level:** {shot['roast_level']}  |  **Process:** {shot['process_method']}  |  **Roast Date:** {shot['roast_date']}")
+            st.markdown(f"**Roast Date:** {shot['roast_date']}")
             if st.button("Delete", key=f"del_{shot['id']}"):
                 delete_shot(shot["id"])
                 st.rerun()
 
     # ── Trends ────────────────────────────────────────────────────────────────
     st.markdown("---")
-    st.subheader("Trends")
+    st.markdown('<div class="section-header">Trends</div>', unsafe_allow_html=True)
 
     df = pd.DataFrame(shots)
     df = df[::-1].reset_index(drop=True)
