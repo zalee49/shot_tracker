@@ -98,8 +98,8 @@ def ratio_flag(yield_, dose, target):
 
 def ratio_badge_class(flag):
     if flag == "On target":
-        return "badge-on-target"
-    return "badge-off-target"
+        return "status-on-target"
+    return "status-off-target"
 
 
 def shot_prop_grid(rows):
@@ -160,326 +160,371 @@ if "target_ratio" not in st.session_state:
     st.session_state.target_ratio = 2.0
 
 st.html("""
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-    --notion-bg: #FCFBF9;
-    --notion-bg-subtle: #F3F1ED;
-    --notion-bg-hover: #EAE6E0;
-    --notion-text: #292724;
-    --notion-text-secondary: #6F6A63;
-    --notion-border: rgba(62, 52, 43, 0.10);
-    --notion-border-strong: rgba(62, 52, 43, 0.20);
-    --notion-blue: #8A4B32;
-    --notion-blue-hover: #713B27;
-    --notion-blue-muted: rgba(138, 75, 50, 0.10);
-    --green: #2F6B57;
-    --green-muted: #E5EFEA;
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --surface: #FFFFFF;
+    --surface-subtle: #F7F6F4;
+    --surface-muted: #EFEEEB;
+    --text: #1F1E1C;
+    --text-muted: #6D6963;
+    --border: #E4E1DC;
+    --border-strong: #CDC8C1;
+    --accent: #8A4B32;
+    --accent-hover: #713B27;
+    --accent-soft: #F4EAE6;
+    --success: #2F6B57;
+    --success-soft: #E8F1ED;
+    --warning: #A35B16;
+    --warning-soft: #FAEFE2;
+    --danger: #B0443E;
+    --radius: 8px;
+    --shadow: 0 1px 2px rgba(31, 30, 28, 0.05);
 }
 
 html, body, [class*="css"] {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    color: var(--notion-text) !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    color: var(--text) !important;
+}
+
+.stApp {
+    background: #FBFAF8;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', sans-serif !important;
-    font-weight: 600 !important;
-    color: var(--notion-text) !important;
+    color: var(--text) !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.015em;
 }
 
+header[data-testid="stHeader"],
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 #MainMenu,
 footer,
 [data-testid="stFooter"],
-[data-testid="stBottom"],
-[data-testid="stBottomBlockContainer"],
-[class*="viewerBadge"],
-[class*="embeddedAppMetaInfoBar"],
-[class*="AppMetaInfoBar"] {
+.stDeployButton {
     display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    max-height: 0 !important;
-    overflow: hidden !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    position: fixed !important;
 }
-.stDeployButton { display: none !important; }
 
-.main .block-container {
-    padding-top: 2.5rem;
-    padding-bottom: 4rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    max-width: 960px;
-}
+.main .block-container,
 [data-testid="stMainBlockContainer"] {
-    max-width: 1040px;
+    width: 100%;
+    max-width: 960px;
     margin: 0 auto;
-    padding-top: max(2.5rem, calc(env(safe-area-inset-top) + 1.5rem));
-    padding-bottom: 4rem;
-}
-
-[data-testid="stSidebar"] {
-    background-color: var(--notion-bg-subtle) !important;
-    border-right: 1px solid var(--notion-border) !important;
-}
-[data-testid="stSidebar"] .block-container {
-    padding-top: 1.5rem;
-}
-
-.sidebar-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--notion-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
-}
-.sidebar-divider {
-    height: 1px;
-    background: var(--notion-border);
-    margin: 20px 0;
-}
-
-.page-title {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--notion-text);
-    line-height: 1.3;
-    margin: 0;
-}
-.page-subtitle {
-    font-size: 0.875rem;
-    color: var(--notion-text-secondary);
-    margin-top: 3px;
+    padding: 1.75rem 1.25rem 4rem;
 }
 
 .app-header {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 1.5rem;
-    overflow: visible;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.app-mark {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    place-items: center;
+    background: var(--accent-soft);
+    border: 1px solid #E7D5CE;
+    border-radius: var(--radius);
+}
+
+.page-title {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    margin-top: 0.1rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    line-height: 1.35;
 }
 
 .section-header {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--notion-text);
-    margin: 2rem 0 1rem 0;
+    margin: 1.5rem 0 0.25rem;
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
 }
+
 .section-copy {
-    color: var(--notion-text-secondary);
+    margin: 0 0 1.25rem;
+    color: var(--text-muted);
     font-size: 0.875rem;
-    margin: -0.6rem 0 1.1rem;
 }
+
 .subsection-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--notion-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 1rem 0 0.75rem 0;
-}
-.chart-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--notion-text-secondary);
-    margin: 1.25rem 0 0.5rem 0;
-}
-
-.dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-.dashboard-stat {
-    min-width: 0;
-    padding: 1rem 1.25rem;
-    background: #FFFFFF;
-    border: 1px solid var(--notion-border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 1px 2px rgba(62, 52, 43, 0.04);
-}
-.dashboard-stat-label {
-    color: var(--notion-text-secondary);
+    margin: 1.25rem 0 0.65rem;
+    color: var(--text);
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
-.dashboard-stat-value {
-    margin-top: 0.2rem;
-    color: var(--notion-text);
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.3;
-}
+
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
-    gap: 1.5rem;
-    border-bottom: 1px solid var(--notion-border);
-    margin-bottom: 0.25rem;
-}
-[data-testid="stTabs"] [data-baseweb="tab"] {
-    height: 48px;
-    padding: 0 2px;
-    color: var(--notion-text-secondary);
-    font-weight: 500;
-}
-[data-testid="stTabs"] [aria-selected="true"] {
-    color: var(--notion-text) !important;
-}
-[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
-    background-color: var(--notion-blue) !important;
-    height: 2px;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--border);
 }
 
-[data-testid="stVerticalBlockBorderWrapper"] {
-    background: #FFFFFF;
-    border-color: var(--notion-border) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: 0 1px 3px rgba(62, 52, 43, 0.05);
+[data-testid="stTabs"] [data-baseweb="tab"] {
+    height: 42px;
+    padding: 0 1px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
 }
-input[type="text"], input[type="number"], textarea, select {
-    background-color: var(--notion-bg) !important;
-    border: 1px solid var(--notion-border-strong) !important;
-    border-radius: var(--radius-sm) !important;
-    color: var(--notion-text) !important;
+
+[data-testid="stTabs"] [aria-selected="true"] {
+    color: var(--text) !important;
 }
-input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
-    border-color: var(--notion-blue) !important;
-    box-shadow: 0 0 0 2px var(--notion-blue-muted) !important;
+
+[data-testid="stTabs"] [data-baseweb="tab-highlight"] {
+    height: 2px;
+    background: var(--accent) !important;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"],
+[data-testid="stExpander"] {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 [data-testid="stExpander"] {
-    background-color: #FFFFFF !important;
-    border: 1px solid var(--notion-border) !important;
-    border-radius: var(--radius-md) !important;
-    box-shadow: none !important;
-    margin-bottom: 6px !important;
-    overflow: hidden !important;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
 }
+
 [data-testid="stExpander"] summary {
-    font-weight: 500 !important;
-    padding: 12px 16px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    line-height: 1.4 !important;
+    min-height: 46px;
+    padding: 0.75rem 0.9rem !important;
+    font-size: 0.875rem;
+    font-weight: 600 !important;
 }
+
 [data-testid="stExpander"] summary:hover {
-    background-color: var(--notion-bg-subtle) !important;
+    background: var(--surface-subtle);
+}
+
+[data-baseweb="input"] > div,
+[data-baseweb="select"] > div,
+[data-baseweb="textarea"] > div {
+    background: var(--surface) !important;
+    border-color: var(--border-strong) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: none !important;
+}
+
+[data-baseweb="input"] > div:focus-within,
+[data-baseweb="select"] > div:focus-within,
+[data-baseweb="textarea"] > div:focus-within {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px var(--accent-soft) !important;
 }
 
 [data-testid="stFormSubmitButton"] button {
-    background: var(--notion-blue) !important;
-    color: #FFFFFF !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius-md) !important;
-    border: none !important;
-}
-[data-testid="stFormSubmitButton"] button:hover {
-    background: var(--notion-blue-hover) !important;
-}
-
-[data-testid="stExpander"] [data-testid="stButton"] button {
-    background: rgba(55, 53, 47, 0.06) !important;
-    color: #E03E3E !important;
-    border: 1px solid var(--notion-border) !important;
-    border-radius: var(--radius-md) !important;
-    font-weight: 500 !important;
+    min-height: 44px;
+    background: var(--accent) !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: var(--radius) !important;
+    color: white !important;
+    font-weight: 650 !important;
     box-shadow: none !important;
 }
-[data-testid="stExpander"] [data-testid="stButton"] button:hover {
-    background: rgba(224, 62, 62, 0.08) !important;
-    border-color: rgba(224, 62, 62, 0.2) !important;
+
+[data-testid="stFormSubmitButton"] button:hover {
+    background: var(--accent-hover) !important;
+    border-color: var(--accent-hover) !important;
 }
 
-hr {
-    border: none !important;
-    height: 1px !important;
-    background: var(--notion-border) !important;
-    margin: 1.5rem 0 !important;
-}
-
-[data-testid="stAlert"] {
-    border-radius: var(--radius-md) !important;
-    border: 1px solid var(--notion-border) !important;
-}
-
-.badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    margin-right: 6px;
-    margin-bottom: 8px;
-}
-.badge-roast { background: rgba(107, 76, 53, 0.1); color: #6B4C35; }
-.badge-process { background: rgba(35, 131, 226, 0.1); color: #2383E2; }
-.badge-on-target { background: var(--green-muted); color: var(--green); }
-.badge-off-target { background: rgba(237, 108, 2, 0.1); color: #ED6C02; }
-.badge-neutral { background: rgba(55, 53, 47, 0.06); color: #787774; }
-
-.prop-grid {
-    display: grid;
-    grid-template-columns: 140px 1fr;
-    gap: 8px 16px;
-    margin: 12px 0;
-}
-.prop-label {
-    font-size: 0.875rem;
-    color: var(--notion-text-secondary);
-}
-.prop-value {
-    font-size: 0.875rem;
-    color: var(--notion-text);
-}
-
-.delete-divider {
-    height: 1px;
-    background: var(--notion-border);
-    margin: 16px 0 12px 0;
-}
-
-.shot-summary-line {
-    font-size: 0.875rem;
-    color: var(--notion-text-secondary);
-    margin-bottom: 10px;
+[data-testid="stPopover"] button,
+[data-testid="stButton"] button {
+    min-height: 40px;
+    border-color: var(--border-strong);
+    border-radius: var(--radius);
+    box-shadow: none;
 }
 
 .bean-summary {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    margin: 2px 0 14px;
-    color: var(--green);
-    background: var(--green-muted);
-    border-radius: var(--radius-sm);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+    padding: 0.75rem 0.9rem;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.bean-summary-name {
+    color: var(--text);
+    font-size: 0.875rem;
+    font-weight: 650;
+}
+
+.bean-summary-meta {
+    margin-top: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.settings-note {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 1.25rem 0 1.5rem;
+}
+
+.dashboard-stat {
+    min-width: 0;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.dashboard-stat-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.dashboard-stat-value {
+    margin-top: 0.2rem;
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+}
+
+.history-count {
+    margin: 0.25rem 0 0.75rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.shot-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.shot-recipe {
+    color: var(--text);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.shot-rating {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 650;
+}
+
+.status-on-target {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.status-off-target {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.status-neutral {
+    background: var(--surface-muted);
+    color: var(--text-muted);
+}
+
+.prop-grid {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0.55rem 1rem;
+    margin: 0.25rem 0 1rem;
+}
+
+.prop-label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.prop-value {
+    min-width: 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.delete-divider {
+    height: 1px;
+    margin: 1rem 0 0.75rem;
+    background: var(--border);
+}
+
+[data-testid="stExpander"] [data-testid="stButton"] button {
+    color: var(--danger) !important;
+    background: transparent !important;
+    border-color: var(--border) !important;
 }
 
 .empty-state {
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
     text-align: center;
-    padding: 3rem 1rem;
-    color: var(--notion-text-secondary);
-    border: 1px dashed var(--notion-border-strong);
-    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
 }
 
-.chart-shell {
-    margin-top: 1rem;
-    padding: 0.25rem 0 0.75rem;
-    border-bottom: 1px solid var(--notion-border);
+.chart-label {
+    margin-bottom: 0.25rem;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 650;
+}
+
+[data-testid="stAlert"] {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+hr {
+    margin: 1.25rem 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--border) !important;
 }
 
 @media (max-width: 640px) {
@@ -491,143 +536,105 @@ hr {
         display: none !important;
     }
 
-    [data-testid="stAppViewContainer"] > section.main {
-        padding-top: 0 !important;
-    }
-
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: calc(2rem + 52px);
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-    }
-
+    .main .block-container,
     [data-testid="stMainBlockContainer"] {
-        padding-top: max(2rem, calc(env(safe-area-inset-top) + 1.25rem));
-        padding-bottom: calc(2rem + 52px);
-    }
-
-    [data-testid="stSidebar"] .block-container {
-        padding-top: 1rem;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-    }
-
-    .page-title {
-        font-size: 1.375rem;
-    }
-    .page-subtitle {
-        font-size: 0.8125rem;
-    }
-
-    .section-header {
-        font-size: 1.125rem;
-        margin: 1.5rem 0 0.75rem 0;
+        padding: calc(env(safe-area-inset-top) + 1rem) 0.85rem 2.5rem;
     }
 
     .app-header {
-        margin-bottom: 1rem;
+        margin-bottom: 0.45rem;
     }
 
-    .dashboard-stats {
-        gap: 0.5rem;
+    .page-subtitle {
+        display: none;
     }
-    .dashboard-stat {
-        padding: 0.75rem 0.625rem;
+
+    .section-header {
+        margin-top: 1.1rem;
+        font-size: 1.15rem;
     }
-    .dashboard-stat-label {
-        min-height: 2rem;
-        font-size: 0.625rem;
-    }
-    .dashboard-stat-value {
-        font-size: 1.125rem;
+
+    .section-copy {
+        margin-bottom: 1rem;
     }
 
     [data-testid="stTabs"] [data-baseweb="tab-list"] {
         gap: 1rem;
     }
 
-    [data-testid="stHorizontalBlock"] {
-        flex-direction: column !important;
-        gap: 0.5rem !important;
-    }
-    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 100% !important;
-        min-width: 0 !important;
+    [data-testid="stTabs"] [data-baseweb="tab"] {
+        height: 40px;
     }
 
-    [data-testid="stExpander"] summary {
-        padding: 14px 12px !important;
-        min-height: 44px !important;
-        font-size: 0.875rem !important;
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 0.35rem !important;
+    }
+
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 1 100% !important;
     }
 
     [data-testid="stButton"] button,
+    [data-testid="stPopover"] button,
     [data-testid="stFormSubmitButton"] button {
-        min-height: 44px !important;
-        font-size: 1rem !important;
+        min-height: 44px;
+    }
+
+    .dashboard-stats {
+        gap: 0.4rem;
+    }
+
+    .dashboard-stat {
+        padding: 0.75rem 0.6rem;
+    }
+
+    .dashboard-stat-label {
+        min-height: 1.85rem;
+        font-size: 0.6rem;
+    }
+
+    .dashboard-stat-value {
+        font-size: 1.05rem;
+    }
+
+    .bean-summary {
+        align-items: flex-start;
     }
 
     .prop-grid {
         grid-template-columns: 1fr;
-        gap: 2px 0;
+        gap: 0.1rem;
     }
+
     .prop-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-top: 10px;
+        margin-top: 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 650;
     }
+
     .prop-label:first-child {
         margin-top: 0;
     }
-    .prop-value {
-        font-size: 0.875rem;
-        margin-bottom: 4px;
-        word-break: break-word;
-    }
 
-    input[type="text"], input[type="number"], textarea, select {
+    input, textarea, select {
         font-size: 16px !important;
-    }
-
-    .stApp::after {
-        content: "";
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 52px;
-        background: var(--notion-bg);
-        z-index: 999999;
-        pointer-events: none;
     }
 }
 </style>
-<script>
-(function () {
-    function hideBranding() {
-        document.querySelectorAll(
-            'footer, [data-testid="stFooter"], [data-testid="stBottom"], ' +
-            '[data-testid="stBottomBlockContainer"], [class*="viewerBadge"], ' +
-            '[class*="embeddedAppMetaInfoBar"], [class*="AppMetaInfoBar"]'
-        ).forEach(function (el) {
-            el.style.setProperty("display", "none", "important");
-        });
-    }
-    hideBranding();
-    new MutationObserver(hideBranding).observe(document.body, { childList: true, subtree: true });
-})();
-</script>
 """)
 
 st.markdown(
     f"""
     <div class="app-header">
-        <img src="data:image/svg+xml;base64,{base64.b64encode(COFFEE_SVG.format(size=38).encode()).decode()}" width="38" height="38" style="flex-shrink:0;">
+        <div class="app-mark">
+            <img src="data:image/svg+xml;base64,{base64.b64encode(COFFEE_SVG.format(size=22).encode()).decode()}" width="22" height="22" alt="">
+        </div>
         <div>
             <div class="page-title">Zach's Espresso Tracker</div>
-            <div class="page-subtitle">A clearer path to your best espresso.</div>
+            <div class="page-subtitle">Dial in, log, and learn from every shot.</div>
         </div>
     </div>
     """,
@@ -637,34 +644,11 @@ st.markdown(
 shots = load_data()
 saved_beans = get_saved_beans(shots)
 
-if "quick_mode" not in st.session_state:
-    st.session_state.quick_mode = bool(saved_beans)
-
 target_ratio = st.session_state.target_ratio
 rated = [s["rating"] for s in shots if s.get("rating")]
 ratios = [s["yield"] / s["dose"] for s in shots if s.get("dose")]
 avg_rating = f"{sum(rated) / len(rated):.1f} / 5" if rated else "—"
 avg_ratio = f"{sum(ratios) / len(ratios):.2f}:1" if ratios else "—"
-
-st.markdown(
-    f"""
-    <div class="dashboard-stats">
-        <div class="dashboard-stat">
-            <div class="dashboard-stat-label">Shots Logged</div>
-            <div class="dashboard-stat-value">{len(shots)}</div>
-        </div>
-        <div class="dashboard-stat">
-            <div class="dashboard-stat-label">Average Rating</div>
-            <div class="dashboard-stat-value">{html.escape(avg_rating)}</div>
-        </div>
-        <div class="dashboard-stat">
-            <div class="dashboard-stat-label">Average Ratio</div>
-            <div class="dashboard-stat-value">{html.escape(avg_ratio)}</div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 
 if "save_success" in st.session_state:
     save_message = st.session_state.pop("save_success")
@@ -685,41 +669,32 @@ with log_tab:
         pending_bean = st.session_state.pop("pending_quick_log_bean")
         if pending_bean in bean_options:
             st.session_state.selected_bean = pending_bean
-            st.session_state.quick_mode = True
     elif (
         "selected_bean" not in st.session_state
         or st.session_state.selected_bean not in bean_options
     ):
         st.session_state.selected_bean = bean_options[1] if saved_beans else "New bean"
-        st.session_state.quick_mode = bool(saved_beans)
 
-    selected_bean = st.selectbox("Bean", bean_options, key="selected_bean")
-    is_new_bean = selected_bean == "New bean"
-
-    if is_new_bean:
-        st.session_state.quick_mode = False
-
-    settings_col1, settings_col2 = st.columns(2)
-    with settings_col1:
-        quick_mode = st.toggle(
-            "Quick Log",
-            key="quick_mode",
-            disabled=is_new_bean,
-            help="Select a saved bean to reuse its details and show only shot fields.",
-        )
-        if is_new_bean:
-            st.caption("Select a saved bean to use Quick Log.")
-    with settings_col2:
-        st.session_state.target_ratio = st.number_input(
-            "Target Brew Ratio",
-            min_value=1.0,
-            max_value=4.0,
-            step=0.1,
-            value=st.session_state.target_ratio,
-            help="A 1:2 ratio means 18g in and 36g out.",
-        )
+    bean_col, settings_col = st.columns([3, 1])
+    with bean_col:
+        selected_bean = st.selectbox("Bean", bean_options, key="selected_bean")
+    with settings_col:
+        with st.popover("Logging settings", width="stretch"):
+            st.markdown(
+                '<div class="settings-note">Used for ratio guidance and the target line in Insights.</div>',
+                unsafe_allow_html=True,
+            )
+            st.session_state.target_ratio = st.number_input(
+                "Target Brew Ratio",
+                min_value=1.0,
+                max_value=4.0,
+                step=0.1,
+                value=st.session_state.target_ratio,
+                help="A 1:2 ratio means 18g in and 36g out.",
+            )
 
     target_ratio = st.session_state.target_ratio
+    is_new_bean = selected_bean == "New bean"
 
     if selected_bean != "New bean":
         bean_data = saved_beans[selected_bean]
@@ -740,16 +715,20 @@ with log_tab:
         default_process = "Washed"
         default_roast_date = date.today()
 
-    show_bean_fields = is_new_bean or not quick_mode
-
-    if quick_mode and not is_new_bean:
+    if not is_new_bean:
+        bean_meta = " · ".join(
+            value for value in (default_roaster, default_origin, default_process) if value
+        )
         st.markdown(
-            f'<div class="bean-summary">Using saved details for {html.escape(selected_bean)}</div>',
+            '<div class="bean-summary"><div>'
+            f'<div class="bean-summary-name">{html.escape(selected_bean)}</div>'
+            f'<div class="bean-summary-meta">{html.escape(bean_meta or "Saved bean details")}</div>'
+            '</div><span class="settings-note">Details reused automatically</span></div>',
             unsafe_allow_html=True,
         )
 
     with st.form("shot_form"):
-            if show_bean_fields:
+            if is_new_bean:
                 st.markdown('<div class="subsection-label">Bean Details</div>', unsafe_allow_html=True)
                 col1, col2 = st.columns(2)
                 with col1:
@@ -769,12 +748,24 @@ with log_tab:
                         index=safe_index(PROCESS_METHODS, default_process),
                     )
             else:
-                bean_name = default_name
-                roaster = default_roaster
-                origin = default_origin
-                roast_level = default_roast_level
-                process_method = default_process
-                roast_date = default_roast_date
+                with st.expander("Edit bean details"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        bean_name = st.text_input("Bean Name", value=default_name)
+                        origin = st.text_input("Origin", value=default_origin)
+                        roast_date = st.date_input("Roast Date", value=default_roast_date)
+                    with col2:
+                        roaster = st.text_input("Roaster", value=default_roaster)
+                        roast_level = st.selectbox(
+                            "Roast Level",
+                            ROAST_LEVELS,
+                            index=safe_index(ROAST_LEVELS, default_roast_level),
+                        )
+                        process_method = st.selectbox(
+                            "Process Method",
+                            PROCESS_METHODS,
+                            index=safe_index(PROCESS_METHODS, default_process),
+                        )
 
             st.markdown('<div class="subsection-label">Recipe</div>', unsafe_allow_html=True)
             row1_col1, row1_col2 = st.columns(2)
@@ -801,7 +792,7 @@ with log_tab:
                 "Tasting Notes",
                 placeholder="Sweetness, acidity, body, finish, and flavors",
             )
-            submitted = st.form_submit_button("Log Shot", use_container_width=True)
+            submitted = st.form_submit_button("Log Shot", width="stretch")
 
     if submitted:
         if not bean_name.strip():
@@ -886,16 +877,19 @@ with history_tab:
                 ).casefold()
             ]
 
-        st.caption(f"Showing {len(filtered_shots)} of {len(shots)} shots")
+        st.markdown(
+            f'<div class="history-count">Showing {len(filtered_shots)} of {len(shots)} shots</div>',
+            unsafe_allow_html=True,
+        )
         if not filtered_shots:
             st.info("No shots match those filters.")
 
         for shot in filtered_shots:
-            display_date = date.fromisoformat(shot["date"]).strftime("%m/%d/%y")
+            display_date = date.fromisoformat(shot["date"]).strftime("%b %d, %Y").replace(" 0", " ")
             ratio = shot["yield"] / shot["dose"] if shot["dose"] else 0
             flag = ratio_flag(shot["yield"], shot["dose"], target_ratio)
             rating_stars = star_rating(shot.get("rating"))
-            badge_cls = ratio_badge_class(flag) if flag else "badge-neutral"
+            badge_cls = ratio_badge_class(flag) if flag else "status-neutral"
             if flag == "On target":
                 short_flag = "On target"
             elif "Over" in flag:
@@ -905,25 +899,26 @@ with history_tab:
             else:
                 short_flag = "—"
             label = f"{display_date} · {shot['bean_name']}"
-            summary_line = (
-                f"{short_flag} · {fmt(shot['dose'])}g → {fmt(shot['yield'])}g · "
-                f"{shot['brew_time']}s · {rating_stars}"
+            recipe_summary = (
+                f"{fmt(shot['dose'])}g in → {fmt(shot['yield'])}g out · "
+                f"{shot['brew_time']}s · {ratio:.2f}:1"
             )
 
             with st.expander(label, expanded=False):
                 st.markdown(
-                    f'<div class="shot-summary-line">{html.escape(summary_line)}</div>'
-                    f'<span class="badge {badge_cls}">{html.escape(short_flag)}</span>'
-                    f'<span class="badge badge-roast">{html.escape(shot["roast_level"])}</span>'
-                    f'<span class="badge badge-process">{html.escape(shot["process_method"])}</span>',
+                    '<div class="shot-summary">'
+                    f'<span class="status-pill {badge_cls}">{html.escape(short_flag)}</span>'
+                    f'<span class="shot-recipe">{html.escape(recipe_summary)}</span>'
+                    f'<span class="shot-rating">{html.escape(rating_stars)}</span>'
+                    '</div>',
                     unsafe_allow_html=True,
                 )
                 st.markdown(
                     shot_prop_grid([
-                        ("Brew Ratio", f"{ratio:.2f}:1 — {flag}"),
                         ("Grind Size", shot["grind_size"] or "—"),
                         ("Direction", shot.get("grind_direction") or "—"),
                         ("Temperature", f"{shot['temperature']}°C"),
+                        ("Coffee", f"{shot['roast_level']} · {shot['process_method']}"),
                         ("Tasting Notes", shot.get("tasting_notes") or "—"),
                         ("Roaster", shot["roaster"] or "—"),
                         ("Origin", shot["origin"] or "—"),
@@ -945,6 +940,26 @@ with insights_tab:
         unsafe_allow_html=True,
     )
 
+    st.markdown(
+        f"""
+        <div class="dashboard-stats">
+            <div class="dashboard-stat">
+                <div class="dashboard-stat-label">Shots Logged</div>
+                <div class="dashboard-stat-value">{len(shots)}</div>
+            </div>
+            <div class="dashboard-stat">
+                <div class="dashboard-stat-label">Average Rating</div>
+                <div class="dashboard-stat-value">{html.escape(avg_rating)}</div>
+            </div>
+            <div class="dashboard-stat">
+                <div class="dashboard-stat-label">Average Ratio</div>
+                <div class="dashboard-stat-value">{html.escape(avg_ratio)}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
     if not shots:
         st.markdown(
             '<div class="empty-state">Trends will appear once you have shots to compare.</div>',
@@ -955,26 +970,26 @@ with insights_tab:
         df = df[::-1].reset_index(drop=True)
         df["Brew Ratio"] = df["yield"] / df["dose"]
 
-        st.markdown('<div class="chart-shell"><div class="chart-label">Brew Ratio</div>', unsafe_allow_html=True)
-        ratio_chart = trend_line_chart(df, "Brew Ratio", "Brew Ratio")
-        target_line = alt.Chart(pd.DataFrame({"target": [target_ratio]})).mark_rule(
-            color="#8A4B32",
-            strokeDash=[5, 5],
-        ).encode(y="target:Q")
-        st.altair_chart(ratio_chart + target_line, use_container_width=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown('<div class="chart-label">Brew Ratio</div>', unsafe_allow_html=True)
+            ratio_chart = trend_line_chart(df, "Brew Ratio", "Brew Ratio")
+            target_line = alt.Chart(pd.DataFrame({"target": [target_ratio]})).mark_rule(
+                color="#8A4B32",
+                strokeDash=[5, 5],
+            ).encode(y="target:Q")
+            st.altair_chart(ratio_chart + target_line, width="stretch")
 
-        st.markdown('<div class="chart-shell"><div class="chart-label">Brew Time</div>', unsafe_allow_html=True)
-        st.altair_chart(
-            trend_line_chart(df, "brew_time", "Brew Time", color="#376A8A"),
-            use_container_width=True,
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown('<div class="chart-label">Brew Time</div>', unsafe_allow_html=True)
+            st.altair_chart(
+                trend_line_chart(df, "brew_time", "Brew Time", color="#376A8A"),
+                width="stretch",
+            )
 
         if df["rating"].notna().any():
-            st.markdown('<div class="chart-shell"><div class="chart-label">Rating</div>', unsafe_allow_html=True)
-            st.altair_chart(
-                trend_line_chart(df, "rating", "Rating", color="#A76D28"),
-                use_container_width=True,
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
+            with st.container(border=True):
+                st.markdown('<div class="chart-label">Rating</div>', unsafe_allow_html=True)
+                st.altair_chart(
+                    trend_line_chart(df, "rating", "Rating", color="#A76D28"),
+                    width="stretch",
+                )
