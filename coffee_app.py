@@ -643,6 +643,7 @@ st.markdown(
 
 shots = load_data()
 saved_beans = get_saved_beans(shots)
+last_shot = shots[0] if shots else {}
 
 target_ratio = st.session_state.target_ratio
 rated = [s["rating"] for s in shots if s.get("rating")]
@@ -770,19 +771,47 @@ with log_tab:
             st.markdown('<div class="subsection-label">Recipe</div>', unsafe_allow_html=True)
             row1_col1, row1_col2 = st.columns(2)
             with row1_col1:
-                dose = st.number_input("Dose (g)", min_value=0.0, max_value=30.0, step=0.1, value=18.0)
+                dose = st.number_input(
+                    "Dose (g)",
+                    min_value=0.0,
+                    max_value=30.0,
+                    step=0.1,
+                    value=float(last_shot.get("dose") or 18.0),
+                )
             with row1_col2:
-                yield_ = st.number_input("Yield (g)", min_value=0.0, max_value=100.0, step=0.1, value=36.0)
+                yield_ = st.number_input(
+                    "Yield (g)",
+                    min_value=0.0,
+                    max_value=100.0,
+                    step=0.1,
+                    value=float(last_shot.get("yield") or 36.0),
+                )
 
             row2_col1, row2_col2 = st.columns(2)
             with row2_col1:
-                brew_time = st.number_input("Brew Time (s)", min_value=0, max_value=120, step=1, value=28)
+                brew_time = st.number_input(
+                    "Brew Time (s)",
+                    min_value=0,
+                    max_value=120,
+                    step=1,
+                    value=int(last_shot.get("brew_time") or 28),
+                )
             with row2_col2:
-                temperature = st.number_input("Temperature (°C)", min_value=80.0, max_value=100.0, step=0.5, value=93.0)
+                temperature = st.number_input(
+                    "Temperature (°C)",
+                    min_value=80.0,
+                    max_value=100.0,
+                    step=0.5,
+                    value=float(last_shot.get("temperature") or 93.0),
+                )
 
             row3_col1, row3_col2 = st.columns(2)
             with row3_col1:
-                grind_size = st.text_input("Grind Size", placeholder="11 or 2.5 turns")
+                grind_size = st.text_input(
+                    "Grind Size",
+                    value=last_shot.get("grind_size") or "",
+                    placeholder="11 or 2.5 turns",
+                )
             with row3_col2:
                 grind_direction = st.selectbox("Adjustment vs Last Shot", GRIND_DIRECTIONS)
 
