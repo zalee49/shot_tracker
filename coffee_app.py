@@ -1,5 +1,6 @@
 import base64
 import html
+import math
 import streamlit as st
 import pandas as pd
 import requests
@@ -9,6 +10,24 @@ from datetime import date
 ROAST_LEVELS = ["Light", "Medium", "Medium-Dark", "Dark"]
 PROCESS_METHODS = ["Washed", "Natural", "Honey", "Other"]
 GRIND_DIRECTIONS = ["First shot with this grind", "Same", "Coarser", "Finer"]
+SHOT_FIELDS = [
+    "id",
+    "date",
+    "bean_name",
+    "roaster",
+    "origin",
+    "roast_level",
+    "process_method",
+    "roast_date",
+    "dose",
+    "yield",
+    "brew_time",
+    "grind_size",
+    "grind_direction",
+    "temperature",
+    "rating",
+    "tasting_notes",
+]
 
 COFFEE_SVG = """
 <svg width="{size}" height="{size}" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
@@ -32,12 +51,100 @@ def get_url(path=""):
     return f"{st.secrets['SUPABASE_URL']}/rest/v1/shots{path}"
 
 
+def normalize_text(value):
+    if value is None:
+        return ""
+    return " ".join(str(value).split())
+
+
+def bean_key(value):
+    return normalize_text(value).casefold()
+
+
+def coerce_number(value, minimum=None, maximum=None, integer=False):
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(number):
+        return None
+    if minimum is not None and number < minimum:
+        return None
+    if maximum is not None and number > maximum:
+        return None
+    if integer:
+        if not number.is_integer():
+            return None
+        return int(number)
+    return number
+
+
+def normalize_date(value):
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        return None
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return None
+    return parsed.date().isoformat()
+
+
+def normalize_shot(row):
+    if not isinstance(row, dict):
+        return None
+    return {
+        "id": coerce_number(row.get("id"), minimum=0, integer=True),
+        "date": normalize_date(row.get("date")),
+        "bean_name": normalize_text(row.get("bean_name")),
+        "roaster": normalize_text(row.get("roaster")),
+        "origin": normalize_text(row.get("origin")),
+        "roast_level": normalize_text(row.get("roast_level")),
+        "process_method": normalize_text(row.get("process_method")),
+        "roast_date": normalize_date(row.get("roast_date")),
+        "dose": coerce_number(row.get("dose"), minimum=0),
+        "yield": coerce_number(row.get("yield"), minimum=0),
+        "brew_time": coerce_number(row.get("brew_time"), minimum=0, integer=True),
+        "grind_size": normalize_text(row.get("grind_size")),
+        "grind_direction": normalize_text(row.get("grind_direction")),
+        "temperature": coerce_number(row.get("temperature")),
+        "rating": coerce_number(row.get("rating"), minimum=1, maximum=5, integer=True),
+        "tasting_notes": normalize_text(row.get("tasting_notes")),
+    }
+
+
 def load_data():
-    response = requests.get(
-        get_url("?order=id.desc"),
-        headers=get_headers()
-    )
-    return response.json()
+    try:
+        response = requests.get(
+            get_url("?order=id.desc"),
+            headers=get_headers(),
+            timeout=15,
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        return [], "Could not load shots from the database.", 0
+
+    try:
+        data = response.json()
+    except ValueError:
+        return [], "The database returned an unreadable response.", 0
+
+    if not isinstance(data, list):
+        return [], "The database returned an unexpected response.", 0
+
+    normalized_shots = []
+    skipped_rows = 0
+    for row in data:
+        shot = normalize_shot(row)
+        if shot is None:
+            skipped_rows += 1
+        else:
+            normalized_shots.append(shot)
+    return normalized_shots, None, skipped_rows
 
 
 def save_shot(row):
@@ -51,19 +158,55 @@ def save_shot(row):
 
 
 def delete_shot(shot_id):
-    requests.delete(
-        get_url(f"?id=eq.{shot_id}"),
-        headers=get_headers()
-    )
+    normalized_id = coerce_number(shot_id, minimum=0, integer=True)
+    if normalized_id is None:
+        st.error("Could not delete this shot because its ID is invalid.")
+        return False
+
+    try:
+        response = requests.delete(
+            get_url(),
+            params={"id": f"eq.{normalized_id}", "select": "id"},
+            headers={**get_headers(), "Prefer": "return=representation"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        deleted_rows = response.json()
+    except (requests.RequestException, ValueError):
+        st.error("Could not delete the shot. Check the database connection and permissions.")
+        return False
+
+    if (
+        not isinstance(deleted_rows, list)
+        or len(deleted_rows) != 1
+        or not isinstance(deleted_rows[0], dict)
+        or coerce_number(deleted_rows[0].get("id"), minimum=0, integer=True)
+        != normalized_id
+    ):
+        st.error("The database did not confirm that exactly one shot was deleted.")
+        return False
+    return True
 
 
 def get_saved_beans(shots):
+    """Return display bean names mapped to their most recent shot."""
     seen = {}
+    saved_beans = {}
     for shot in shots:
-        name = shot["bean_name"]
-        if name not in seen:
-            seen[name] = shot
-    return seen
+        name = normalize_text(shot.get("bean_name"))
+        key = bean_key(name)
+        if key and key not in seen:
+            seen[key] = name
+            saved_beans[name] = shot
+    return saved_beans
+
+
+def saved_bean_name(saved_beans, value):
+    target_key = bean_key(value)
+    return next(
+        (name for name in saved_beans if bean_key(name) == target_key),
+        None,
+    )
 
 
 def star_rating(rating):
@@ -73,6 +216,8 @@ def star_rating(rating):
 
 
 def fmt(value):
+    if value is None:
+        return "—"
     return int(value) if value == int(value) else value
 
 
@@ -83,10 +228,31 @@ def safe_index(options, value, default=0):
         return default
 
 
+def widget_default(value, default, minimum, maximum, integer=False):
+    number = coerce_number(value)
+    if number is None:
+        number = default
+    number = min(max(number, minimum), maximum)
+    return int(number) if integer else float(number)
+
+
+def display_date(value):
+    normalized = normalize_date(value)
+    if not normalized:
+        return "Unknown date"
+    return date.fromisoformat(normalized).strftime("%b %d, %Y").replace(" 0", " ")
+
+
+def brew_ratio(yield_, dose):
+    if yield_ is None or dose is None or dose <= 0:
+        return None
+    return yield_ / dose
+
+
 def ratio_flag(yield_, dose, target):
-    if not dose:
+    ratio = brew_ratio(yield_, dose)
+    if ratio is None:
         return ""
-    ratio = yield_ / dose
     diff = ratio - target
     if abs(diff) <= 0.05:
         return "On target"
@@ -111,9 +277,61 @@ def shot_prop_grid(rows):
     return f'<div class="prop-grid">{items}</div>'
 
 
+def get_previous_shots_by_id(shots):
+    """Map each shot id to its chronologically previous shot for the same bean.
+
+    Iterates oldest-to-newest (reversed order); for each shot, the currently
+    stored 'latest' for that bean is actually the immediate predecessor.
+    """
+    previous_shots = {}
+    latest_shot_by_bean = {}
+    for shot in reversed(shots):
+        shot_id = shot.get("id")
+        normalized_bean = bean_key(shot.get("bean_name"))
+        if shot_id is not None:
+            previous_shots[shot_id] = latest_shot_by_bean.get(normalized_bean)
+        if normalized_bean:
+            latest_shot_by_bean[normalized_bean] = shot
+    return previous_shots
+
+
+def history_metric_grid(shot, previous_shot):
+    metrics = (
+        ("Dose In", "dose", "g"),
+        ("Dose Out", "yield", "g"),
+        ("Time", "brew_time", "s"),
+    )
+    items = []
+    for label, field, unit in metrics:
+        value = shot.get(field)
+        display_value = "—" if value is None else f"{fmt(float(value))}{unit}"
+
+        if previous_shot is None:
+            change = "First shot"
+        else:
+            previous_value = previous_shot.get(field)
+            if value is None or previous_value is None:
+                change = "No comparison"
+            else:
+                difference = round(float(value) - float(previous_value), 2)
+                if difference == 0:
+                    change = "No change"
+                else:
+                    sign = "+" if difference > 0 else "−"
+                    change = f"{sign}{fmt(abs(difference))}{unit}"
+
+        items.append(
+            '<div class="history-metric">'
+            f'<div class="history-metric-label">{html.escape(label)}</div>'
+            f'<div class="history-metric-value">{html.escape(display_value)}</div>'
+            f'<div class="history-metric-change">{html.escape(change)}</div>'
+            '</div>'
+        )
+    return f'<div class="history-metrics">{"".join(items)}</div>'
+
+
 def trend_line_chart(dataframe, value_column, label, color="#2F6B57"):
-    chart_df = dataframe[["date", value_column, "bean_name"]].dropna().copy()
-    chart_df["date"] = pd.to_datetime(chart_df["date"])
+    chart_df = dataframe.reindex(columns=["date", value_column, "bean_name"]).dropna().copy()
     return alt.Chart(chart_df).mark_line(
         color=color,
         strokeWidth=2.5,
@@ -181,7 +399,7 @@ st.html("""
     --shadow: 0 1px 2px rgba(31, 30, 28, 0.05);
 }
 
-html, body, [class*="css"] {
+html, body, .stApp, .stApp * {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     color: var(--text) !important;
 }
@@ -424,6 +642,70 @@ footer,
     font-size: 0.78rem;
 }
 
+.history-shot-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+}
+
+.history-shot-bean {
+    min-width: 0;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.history-shot-date {
+    flex: 0 0 auto;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.history-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 0.75rem;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.history-metric {
+    min-width: 0;
+    padding: 0.75rem 0.85rem;
+}
+
+.history-metric + .history-metric {
+    border-left: 1px solid var(--border);
+}
+
+.history-metric-label {
+    color: var(--text-muted);
+    font-size: 0.66rem;
+    font-weight: 650;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.history-metric-value {
+    margin-top: 0.15rem;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+}
+
+.history-metric-change {
+    margin-top: 0.15rem;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    line-height: 1.25;
+}
+
 .shot-summary {
     display: flex;
     flex-wrap: wrap;
@@ -558,6 +840,27 @@ hr {
         margin-bottom: 1rem;
     }
 
+    .history-shot-header {
+        display: block;
+        margin-bottom: 0.7rem;
+    }
+
+    .history-shot-date {
+        margin-top: 0.15rem;
+    }
+
+    .history-metric {
+        padding: 0.65rem 0.55rem;
+    }
+
+    .history-metric-value {
+        font-size: 1rem;
+    }
+
+    .history-metric-change {
+        font-size: 0.66rem;
+    }
+
     [data-testid="stTabs"] [data-baseweb="tab-list"] {
         gap: 1rem;
     }
@@ -641,15 +944,24 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-shots = load_data()
+shots, load_error, skipped_rows = load_data()
 saved_beans = get_saved_beans(shots)
 last_shot = shots[0] if shots else {}
 
 target_ratio = st.session_state.target_ratio
-rated = [s["rating"] for s in shots if s.get("rating")]
-ratios = [s["yield"] / s["dose"] for s in shots if s.get("dose")]
+rated = [s.get("rating") for s in shots if s.get("rating")]
+ratios = [
+    ratio
+    for shot in shots
+    if (ratio := brew_ratio(shot.get("yield"), shot.get("dose"))) is not None
+]
 avg_rating = f"{sum(rated) / len(rated):.1f} / 5" if rated else "—"
 avg_ratio = f"{sum(ratios) / len(ratios):.2f}:1" if ratios else "—"
+
+if load_error:
+    st.error(f"{load_error} Logging and deletion are disabled until it reconnects.")
+elif skipped_rows:
+    st.warning(f"Skipped {skipped_rows} unreadable database row{'s' if skipped_rows != 1 else ''}.")
 
 if "save_success" in st.session_state:
     save_message = st.session_state.pop("save_success")
@@ -668,12 +980,18 @@ with log_tab:
     bean_options = ["New bean"] + list(saved_beans.keys())
     if "pending_quick_log_bean" in st.session_state:
         pending_bean = st.session_state.pop("pending_quick_log_bean")
-        if pending_bean in bean_options:
-            st.session_state.selected_bean = pending_bean
-    elif (
-        "selected_bean" not in st.session_state
-        or st.session_state.selected_bean not in bean_options
-    ):
+        matched_bean = saved_bean_name(saved_beans, pending_bean)
+        if matched_bean:
+            st.session_state.selected_bean = matched_bean
+    elif "selected_bean" in st.session_state:
+        selected_value = st.session_state.selected_bean
+        if selected_value != "New bean":
+            matched_bean = saved_bean_name(saved_beans, selected_value)
+            if matched_bean:
+                st.session_state.selected_bean = matched_bean
+            else:
+                st.session_state.selected_bean = bean_options[1] if saved_beans else "New bean"
+    else:
         st.session_state.selected_bean = bean_options[1] if saved_beans else "New bean"
 
     bean_col, settings_col = st.columns([3, 1])
@@ -700,13 +1018,13 @@ with log_tab:
     if selected_bean != "New bean":
         bean_data = saved_beans[selected_bean]
         default_name = selected_bean
-        default_roaster = bean_data["roaster"]
-        default_origin = bean_data["origin"]
-        default_roast_level = bean_data["roast_level"]
-        default_process = bean_data["process_method"]
+        default_roaster = normalize_text(bean_data.get("roaster"))
+        default_origin = normalize_text(bean_data.get("origin"))
+        default_roast_level = normalize_text(bean_data.get("roast_level")) or "Light"
+        default_process = normalize_text(bean_data.get("process_method")) or "Washed"
         try:
-            default_roast_date = date.fromisoformat(str(bean_data["roast_date"]))
-        except Exception:
+            default_roast_date = date.fromisoformat(bean_data.get("roast_date"))
+        except (TypeError, ValueError):
             default_roast_date = date.today()
     else:
         default_name = ""
@@ -776,7 +1094,7 @@ with log_tab:
                     min_value=0.0,
                     max_value=30.0,
                     step=0.1,
-                    value=float(last_shot.get("dose") or 18.0),
+                    value=widget_default(last_shot.get("dose"), 18.0, 0.0, 30.0),
                 )
             with row1_col2:
                 yield_ = st.number_input(
@@ -784,7 +1102,7 @@ with log_tab:
                     min_value=0.0,
                     max_value=100.0,
                     step=0.1,
-                    value=float(last_shot.get("yield") or 36.0),
+                    value=widget_default(last_shot.get("yield"), 36.0, 0.0, 100.0),
                 )
 
             row2_col1, row2_col2 = st.columns(2)
@@ -794,7 +1112,13 @@ with log_tab:
                     min_value=0,
                     max_value=120,
                     step=1,
-                    value=int(last_shot.get("brew_time") or 28),
+                    value=widget_default(
+                        last_shot.get("brew_time"),
+                        28,
+                        0,
+                        120,
+                        integer=True,
+                    ),
                 )
             with row2_col2:
                 temperature = st.number_input(
@@ -802,7 +1126,12 @@ with log_tab:
                     min_value=80.0,
                     max_value=100.0,
                     step=0.5,
-                    value=float(last_shot.get("temperature") or 93.0),
+                    value=widget_default(
+                        last_shot.get("temperature"),
+                        93.0,
+                        80.0,
+                        100.0,
+                    ),
                 )
 
             row3_col1, row3_col2 = st.columns(2)
@@ -821,10 +1150,17 @@ with log_tab:
                 "Tasting Notes",
                 placeholder="Sweetness, acidity, body, finish, and flavors",
             )
-            submitted = st.form_submit_button("Log Shot", width="stretch")
+            submitted = st.form_submit_button(
+                "Log Shot",
+                width="stretch",
+                disabled=load_error is not None,
+            )
 
     if submitted:
-        if not bean_name.strip():
+        normalized_bean_name = normalize_text(bean_name)
+        if load_error:
+            st.error("Reconnect to the database before logging a shot.")
+        elif not normalized_bean_name:
             error_message = "Add a bean name before logging this shot."
             st.error(error_message)
             st.toast(error_message, icon=":material/warning:")
@@ -836,7 +1172,7 @@ with log_tab:
             try:
                 save_shot({
                     "date": date.today().strftime("%Y-%m-%d"),
-                    "bean_name": bean_name.strip(),
+                    "bean_name": normalized_bean_name,
                     "roaster": roaster,
                     "origin": origin,
                     "roast_level": roast_level,
@@ -868,7 +1204,7 @@ with log_tab:
                 st.session_state.save_success = (
                     f"Shot logged. Brew ratio: {ratio:.2f}:1 — {flag}"
                 )
-                st.session_state.pending_quick_log_bean = bean_name.strip()
+                st.session_state.pending_quick_log_bean = normalized_bean_name
                 st.rerun()
 
 with history_tab:
@@ -878,7 +1214,12 @@ with history_tab:
         unsafe_allow_html=True,
     )
 
-    if not shots:
+    if load_error:
+        st.markdown(
+            '<div class="empty-state">Shot history is unavailable until the database reconnects.</div>',
+            unsafe_allow_html=True,
+        )
+    elif not shots:
         st.markdown(
             '<div class="empty-state">Your first shot will appear here after you log it.</div>',
             unsafe_allow_html=True,
@@ -895,7 +1236,11 @@ with history_tab:
 
         filtered_shots = shots
         if bean_filter != "All beans":
-            filtered_shots = [shot for shot in filtered_shots if shot["bean_name"] == bean_filter]
+            filter_key = bean_key(bean_filter)
+            filtered_shots = [
+                shot for shot in filtered_shots
+                if bean_key(shot.get("bean_name")) == filter_key
+            ]
         if history_search:
             query = history_search.casefold()
             filtered_shots = [
@@ -913,10 +1258,15 @@ with history_tab:
         if not filtered_shots:
             st.info("No shots match those filters.")
 
+        previous_shots_by_id = get_previous_shots_by_id(shots)
+
         for shot in filtered_shots:
-            display_date = date.fromisoformat(shot["date"]).strftime("%b %d, %Y").replace(" 0", " ")
-            ratio = shot["yield"] / shot["dose"] if shot["dose"] else 0
-            flag = ratio_flag(shot["yield"], shot["dose"], target_ratio)
+            shot_date_display = display_date(shot.get("date"))
+            shot_yield = shot.get("yield")
+            shot_dose = shot.get("dose")
+            ratio = brew_ratio(shot_yield, shot_dose)
+            ratio_display = f"{ratio:.2f}:1" if ratio is not None else "Ratio unavailable"
+            flag = ratio_flag(shot_yield, shot_dose, target_ratio)
             rating_stars = star_rating(shot.get("rating"))
             badge_cls = ratio_badge_class(flag) if flag else "status-neutral"
             if flag == "On target":
@@ -927,40 +1277,64 @@ with history_tab:
                 short_flag = "Under"
             else:
                 short_flag = "—"
-            label = f"{display_date} · {shot['bean_name']}"
-            recipe_summary = (
-                f"{fmt(shot['dose'])}g in → {fmt(shot['yield'])}g out · "
-                f"{shot['brew_time']}s · {ratio:.2f}:1"
-            )
+            previous_shot = previous_shots_by_id.get(shot.get("id"))
+            shot_bean = shot.get("bean_name") or "Unknown bean"
 
-            with st.expander(label, expanded=False):
+            with st.container(border=True):
                 st.markdown(
-                    '<div class="shot-summary">'
-                    f'<span class="status-pill {badge_cls}">{html.escape(short_flag)}</span>'
-                    f'<span class="shot-recipe">{html.escape(recipe_summary)}</span>'
-                    f'<span class="shot-rating">{html.escape(rating_stars)}</span>'
-                    '</div>',
+                    '<div class="history-shot-header">'
+                    f'<div class="history-shot-bean">{html.escape(shot_bean)}</div>'
+                    f'<div class="history-shot-date">{html.escape(shot_date_display)}</div>'
+                    '</div>'
+                    f'{history_metric_grid(shot, previous_shot)}',
                     unsafe_allow_html=True,
                 )
-                st.markdown(
-                    shot_prop_grid([
-                        ("Grind Size", shot["grind_size"] or "—"),
-                        ("Direction", shot.get("grind_direction") or "—"),
-                        ("Temperature", f"{shot['temperature']}°C"),
-                        ("Coffee", f"{shot['roast_level']} · {shot['process_method']}"),
-                        ("Tasting Notes", shot.get("tasting_notes") or "—"),
-                        ("Roaster", shot["roaster"] or "—"),
-                        ("Origin", shot["origin"] or "—"),
-                        ("Roast Date", shot["roast_date"]),
-                    ]),
-                    unsafe_allow_html=True,
-                )
-                st.markdown('<div class="delete-divider"></div>', unsafe_allow_html=True)
-                with st.popover("Delete shot"):
-                    st.caption("This permanently removes the shot.")
-                    if st.button("Delete permanently", key=f"del_{shot['id']}", type="primary"):
-                        delete_shot(shot["id"])
-                        st.rerun()
+
+                with st.expander(
+                    f"{shot_bean} · {shot_date_display} · {ratio_display}",
+                    expanded=False,
+                ):
+                    st.markdown(
+                        '<div class="shot-summary">'
+                        f'<span class="status-pill {badge_cls}">{html.escape(short_flag)}</span>'
+                        f'<span class="shot-recipe">{html.escape(ratio_display)}</span>'
+                        f'<span class="shot-rating">{html.escape(rating_stars)}</span>'
+                        '</div>',
+                        unsafe_allow_html=True,
+                    )
+                    shot_temp = shot.get("temperature")
+                    temperature_display = f"{fmt(shot_temp)}°C" if shot_temp is not None else "—"
+                    shot_roast = shot.get("roast_level")
+                    shot_process = shot.get("process_method")
+                    coffee_display = " · ".join(
+                        value for value in (shot_roast, shot_process) if value
+                    ) or "—"
+                    st.markdown(
+                        shot_prop_grid([
+                            ("Grind Size", shot.get("grind_size") or "—"),
+                            ("Direction", shot.get("grind_direction") or "—"),
+                            ("Temperature", temperature_display),
+                            ("Coffee", coffee_display),
+                            ("Tasting Notes", shot.get("tasting_notes") or "—"),
+                            ("Roaster", shot.get("roaster") or "—"),
+                            ("Origin", shot.get("origin") or "—"),
+                            ("Roast Date", shot.get("roast_date") or "—"),
+                        ]),
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown('<div class="delete-divider"></div>', unsafe_allow_html=True)
+                    with st.popover(f"Delete {shot_bean} shot"):
+                        st.caption("This permanently removes the shot.")
+                        shot_id = shot.get("id")
+                        if shot_id is None:
+                            st.caption("This shot cannot be deleted because its ID is unavailable.")
+                        elif st.button(
+                            f"Delete {shot_bean} shot from {shot_date_display}",
+                            key=f"del_{shot_id}",
+                            type="primary",
+                        ):
+                            if delete_shot(shot_id):
+                                st.rerun()
 
 with insights_tab:
     st.markdown('<div class="section-header">Insights</div>', unsafe_allow_html=True)
@@ -989,36 +1363,60 @@ with insights_tab:
         unsafe_allow_html=True,
     )
 
-    if not shots:
+    if load_error:
+        st.markdown(
+            '<div class="empty-state">Insights are unavailable until the database reconnects.</div>',
+            unsafe_allow_html=True,
+        )
+    elif not shots:
         st.markdown(
             '<div class="empty-state">Trends will appear once you have shots to compare.</div>',
             unsafe_allow_html=True,
         )
     else:
-        df = pd.DataFrame(shots)
+        df = pd.DataFrame(shots).reindex(columns=SHOT_FIELDS)
         df = df[::-1].reset_index(drop=True)
-        df["Brew Ratio"] = df["yield"] / df["dose"]
+        for column in ("dose", "yield", "brew_time", "rating"):
+            df[column] = pd.to_numeric(df[column], errors="coerce")
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+        ratio_df = df[df["date"].notna() & df["dose"].gt(0) & df["yield"].notna()].copy()
+        ratio_df["Brew Ratio"] = ratio_df["yield"] / ratio_df["dose"]
+        brew_time_df = df[df["date"].notna() & df["brew_time"].notna()].copy()
+        rating_df = df[df["date"].notna() & df["rating"].notna()].copy()
 
-        with st.container(border=True):
-            st.markdown('<div class="chart-label">Brew Ratio</div>', unsafe_allow_html=True)
-            ratio_chart = trend_line_chart(df, "Brew Ratio", "Brew Ratio")
-            target_line = alt.Chart(pd.DataFrame({"target": [target_ratio]})).mark_rule(
-                color="#8A4B32",
-                strokeDash=[5, 5],
-            ).encode(y="target:Q")
-            st.altair_chart(ratio_chart + target_line, width="stretch")
-
-        with st.container(border=True):
-            st.markdown('<div class="chart-label">Brew Time</div>', unsafe_allow_html=True)
-            st.altair_chart(
-                trend_line_chart(df, "brew_time", "Brew Time", color="#376A8A"),
-                width="stretch",
+        if ratio_df.empty and brew_time_df.empty and rating_df.empty:
+            st.markdown(
+                '<div class="empty-state">No valid recipe data is available for trends.</div>',
+                unsafe_allow_html=True,
             )
+        else:
+            if not ratio_df.empty:
+                with st.container(border=True):
+                    st.markdown('<div class="chart-label">Brew Ratio</div>', unsafe_allow_html=True)
+                    ratio_chart = trend_line_chart(ratio_df, "Brew Ratio", "Brew Ratio")
+                    target_line = alt.Chart(pd.DataFrame({"target": [target_ratio]})).mark_rule(
+                        color="#8A4B32",
+                        strokeDash=[5, 5],
+                    ).encode(y="target:Q")
+                    st.altair_chart(ratio_chart + target_line, width="stretch")
 
-        if df["rating"].notna().any():
-            with st.container(border=True):
-                st.markdown('<div class="chart-label">Rating</div>', unsafe_allow_html=True)
-                st.altair_chart(
-                    trend_line_chart(df, "rating", "Rating", color="#A76D28"),
-                    width="stretch",
-                )
+            if not brew_time_df.empty:
+                with st.container(border=True):
+                    st.markdown('<div class="chart-label">Brew Time</div>', unsafe_allow_html=True)
+                    st.altair_chart(
+                        trend_line_chart(
+                            brew_time_df,
+                            "brew_time",
+                            "Brew Time",
+                            color="#376A8A",
+                        ),
+                        width="stretch",
+                    )
+
+            if not rating_df.empty:
+                with st.container(border=True):
+                    st.markdown('<div class="chart-label">Rating</div>', unsafe_allow_html=True)
+                    st.altair_chart(
+                        trend_line_chart(rating_df, "rating", "Rating", color="#A76D28"),
+                        width="stretch",
+                    )
