@@ -112,7 +112,7 @@ def normalize_shot(row):
         "grind_size": normalize_text(row.get("grind_size")),
         "grind_direction": normalize_text(row.get("grind_direction")),
         "temperature": coerce_number(row.get("temperature")),
-        "rating": coerce_number(row.get("rating"), minimum=1, maximum=5, integer=True),
+        "rating": coerce_number(row.get("rating"), minimum=1, maximum=10, integer=True),
         "tasting_notes": normalize_text(row.get("tasting_notes")),
     }
 
@@ -209,10 +209,10 @@ def saved_bean_name(saved_beans, value):
     )
 
 
-def star_rating(rating):
+def score_text(rating):
     if not rating:
-        return "Not rated"
-    return "★" * int(rating) + "☆" * (5 - int(rating))
+        return "Not scored"
+    return f"{int(rating)}/10"
 
 
 def fmt(value):
@@ -300,11 +300,17 @@ def history_metric_grid(shot, previous_shot):
         ("Dose In", "dose", "g"),
         ("Dose Out", "yield", "g"),
         ("Time", "brew_time", "s"),
+        ("Score", "rating", ""),
     )
     items = []
     for label, field, unit in metrics:
         value = shot.get(field)
-        display_value = "—" if value is None else f"{fmt(float(value))}{unit}"
+        if value is None:
+            display_value = "—"
+        elif field == "rating":
+            display_value = f"{fmt(float(value))}/10"
+        else:
+            display_value = f"{fmt(float(value))}{unit}"
 
         if previous_shot is None:
             change = "First shot"
@@ -330,8 +336,18 @@ def history_metric_grid(shot, previous_shot):
     return f'<div class="history-metrics">{"".join(items)}</div>'
 
 
-def trend_line_chart(dataframe, value_column, label, color="#2F6B57"):
+def trend_line_chart(
+    dataframe,
+    value_column,
+    label,
+    color="#2F6B57",
+    y_domain=None,
+    tooltip_format=".2f",
+):
     chart_df = dataframe.reindex(columns=["date", value_column, "bean_name"]).dropna().copy()
+    y_scale = alt.Scale(zero=False)
+    if y_domain is not None:
+        y_scale = alt.Scale(zero=False, domain=y_domain)
     return alt.Chart(chart_df).mark_line(
         color=color,
         strokeWidth=2.5,
@@ -351,7 +367,7 @@ def trend_line_chart(dataframe, value_column, label, color="#2F6B57"):
         y=alt.Y(
             f"{value_column}:Q",
             title=None,
-            scale=alt.Scale(zero=False),
+            scale=y_scale,
             axis=alt.Axis(
                 gridColor="#EEEAE5",
                 domain=False,
@@ -362,7 +378,7 @@ def trend_line_chart(dataframe, value_column, label, color="#2F6B57"):
         tooltip=[
             alt.Tooltip("date:T", title="Date", format="%b %d, %Y"),
             alt.Tooltip("bean_name:N", title="Bean"),
-            alt.Tooltip(f"{value_column}:Q", title=label, format=".2f"),
+            alt.Tooltip(f"{value_column}:Q", title=label, format=tooltip_format),
         ],
     ).properties(height=220)
 
@@ -399,7 +415,7 @@ st.html("""
     --shadow: 0 1px 2px rgba(31, 30, 28, 0.05);
 }
 
-html, body, .stApp, .stApp * {
+html, body, .stApp {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
     color: var(--text) !important;
 }
@@ -666,7 +682,7 @@ footer,
 
 .history-metrics {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-bottom: 0.75rem;
     background: var(--surface-subtle);
     border: 1px solid var(--border);
@@ -850,15 +866,19 @@ hr {
     }
 
     .history-metric {
-        padding: 0.65rem 0.55rem;
+        padding: 0.65rem 0.45rem;
+    }
+
+    .history-metric-label {
+        font-size: 0.58rem;
     }
 
     .history-metric-value {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 
     .history-metric-change {
-        font-size: 0.66rem;
+        font-size: 0.62rem;
     }
 
     [data-testid="stTabs"] [data-baseweb="tab-list"] {
@@ -955,7 +975,7 @@ ratios = [
     for shot in shots
     if (ratio := brew_ratio(shot.get("yield"), shot.get("dose"))) is not None
 ]
-avg_rating = f"{sum(rated) / len(rated):.1f} / 5" if rated else "—"
+avg_rating = f"{sum(rated) / len(rated):.1f} / 10" if rated else "—"
 avg_ratio = f"{sum(ratios) / len(ratios):.2f}:1" if ratios else "—"
 
 if load_error:
@@ -1145,7 +1165,7 @@ with log_tab:
                 grind_direction = st.selectbox("Adjustment vs Last Shot", GRIND_DIRECTIONS)
 
             st.markdown('<div class="subsection-label">Taste</div>', unsafe_allow_html=True)
-            rating = st.select_slider("Rating", options=[1, 2, 3, 4, 5], value=3)
+            rating = st.select_slider("Score", options=list(range(1, 11)), value=6)
             tasting_notes = st.text_area(
                 "Tasting Notes",
                 placeholder="Sweetness, acidity, body, finish, and flavors",
@@ -1267,7 +1287,7 @@ with history_tab:
             ratio = brew_ratio(shot_yield, shot_dose)
             ratio_display = f"{ratio:.2f}:1" if ratio is not None else "Ratio unavailable"
             flag = ratio_flag(shot_yield, shot_dose, target_ratio)
-            rating_stars = star_rating(shot.get("rating"))
+            score_display = score_text(shot.get("rating"))
             badge_cls = ratio_badge_class(flag) if flag else "status-neutral"
             if flag == "On target":
                 short_flag = "On target"
@@ -1298,7 +1318,7 @@ with history_tab:
                         '<div class="shot-summary">'
                         f'<span class="status-pill {badge_cls}">{html.escape(short_flag)}</span>'
                         f'<span class="shot-recipe">{html.escape(ratio_display)}</span>'
-                        f'<span class="shot-rating">{html.escape(rating_stars)}</span>'
+                        f'<span class="shot-rating">{html.escape(score_display)}</span>'
                         '</div>',
                         unsafe_allow_html=True,
                     )
@@ -1351,7 +1371,7 @@ with insights_tab:
                 <div class="dashboard-stat-value">{len(shots)}</div>
             </div>
             <div class="dashboard-stat">
-                <div class="dashboard-stat-label">Average Rating</div>
+                <div class="dashboard-stat-label">Average Score</div>
                 <div class="dashboard-stat-value">{html.escape(avg_rating)}</div>
             </div>
             <div class="dashboard-stat">
@@ -1415,8 +1435,15 @@ with insights_tab:
 
             if not rating_df.empty:
                 with st.container(border=True):
-                    st.markdown('<div class="chart-label">Rating</div>', unsafe_allow_html=True)
+                    st.markdown('<div class="chart-label">Score</div>', unsafe_allow_html=True)
                     st.altair_chart(
-                        trend_line_chart(rating_df, "rating", "Rating", color="#A76D28"),
+                        trend_line_chart(
+                            rating_df,
+                            "rating",
+                            "Score",
+                            color="#A76D28",
+                            y_domain=[1, 10],
+                            tooltip_format=".0f",
+                        ),
                         width="stretch",
                     )
