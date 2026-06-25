@@ -209,6 +209,15 @@ def saved_bean_name(saved_beans, value):
     )
 
 
+def shots_for_bean(shots, bean_name):
+    target_key = bean_key(bean_name)
+    return [
+        shot
+        for shot in shots
+        if target_key and bean_key(shot.get("bean_name")) == target_key
+    ]
+
+
 def score_text(rating):
     if not rating:
         return "Not scored"
@@ -1053,14 +1062,6 @@ saved_beans = get_saved_beans(shots)
 last_shot = shots[0] if shots else {}
 
 target_ratio = st.session_state.target_ratio
-rated = [s.get("rating") for s in shots if s.get("rating")]
-ratios = [
-    ratio
-    for shot in shots
-    if (ratio := brew_ratio(shot.get("yield"), shot.get("dose"))) is not None
-]
-avg_rating = f"{sum(rated) / len(rated):.1f} / 10" if rated else "—"
-avg_ratio = f"{sum(ratios) / len(ratios):.2f}:1" if ratios else "—"
 
 if load_error:
     st.error(f"{load_error} Logging and deletion are disabled until it reconnects.")
@@ -1443,27 +1444,7 @@ with history_tab:
 with insights_tab:
     st.markdown('<div class="section-header">Insights</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-copy">See how your recipe and results change over time.</div>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        f"""
-        <div class="dashboard-stats">
-            <div class="dashboard-stat">
-                <div class="dashboard-stat-label">Shots Logged</div>
-                <div class="dashboard-stat-value">{len(shots)}</div>
-            </div>
-            <div class="dashboard-stat">
-                <div class="dashboard-stat-label">Average Score</div>
-                <div class="dashboard-stat-value">{html.escape(avg_rating)}</div>
-            </div>
-            <div class="dashboard-stat">
-                <div class="dashboard-stat-label">Average Ratio</div>
-                <div class="dashboard-stat-value">{html.escape(avg_ratio)}</div>
-            </div>
-        </div>
-        """,
+        '<div class="section-copy">See how each bean responds as you dial it in.</div>',
         unsafe_allow_html=True,
     )
 
@@ -1472,13 +1453,70 @@ with insights_tab:
             '<div class="empty-state">Insights are unavailable until the database reconnects.</div>',
             unsafe_allow_html=True,
         )
-    elif not shots:
+    elif not saved_beans:
         st.markdown(
             '<div class="empty-state">Trends will appear once you have shots to compare.</div>',
             unsafe_allow_html=True,
         )
     else:
-        df = pd.DataFrame(shots).reindex(columns=SHOT_FIELDS)
+        bean_options = list(saved_beans.keys())
+        if "insights_bean" in st.session_state:
+            matched_bean = saved_bean_name(
+                saved_beans,
+                st.session_state.insights_bean,
+            )
+            st.session_state.insights_bean = matched_bean or bean_options[0]
+        else:
+            st.session_state.insights_bean = bean_options[0]
+
+        insights_bean = st.selectbox(
+            "Bean",
+            bean_options,
+            key="insights_bean",
+        )
+        bean_shots = shots_for_bean(shots, insights_bean)
+        bean_ratings = [
+            shot.get("rating")
+            for shot in bean_shots
+            if shot.get("rating")
+        ]
+        bean_ratios = [
+            ratio
+            for shot in bean_shots
+            if (ratio := brew_ratio(shot.get("yield"), shot.get("dose"))) is not None
+        ]
+        bean_avg_rating = (
+            f"{sum(bean_ratings) / len(bean_ratings):.1f} / 10"
+            if bean_ratings
+            else "—"
+        )
+        bean_avg_ratio = (
+            f"{sum(bean_ratios) / len(bean_ratios):.2f}:1"
+            if bean_ratios
+            else "—"
+        )
+
+        st.markdown(
+            f"""
+            <div class="dashboard-stats">
+                <div class="dashboard-stat">
+                    <div class="dashboard-stat-label">Shots Logged</div>
+                    <div class="dashboard-stat-value">{len(bean_shots)}</div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="dashboard-stat-label">Average Score</div>
+                    <div class="dashboard-stat-value">{html.escape(bean_avg_rating)}</div>
+                </div>
+                <div class="dashboard-stat">
+                    <div class="dashboard-stat-label">Average Ratio</div>
+                    <div class="dashboard-stat-value">{html.escape(bean_avg_ratio)}</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        df = pd.DataFrame(bean_shots).reindex(columns=SHOT_FIELDS)
         df = df[::-1].reset_index(drop=True)
         for column in ("dose", "yield", "brew_time", "rating"):
             df[column] = pd.to_numeric(df[column], errors="coerce")
@@ -1490,7 +1528,10 @@ with insights_tab:
 
         if ratio_df.empty and brew_time_df.empty and rating_df.empty:
             st.markdown(
-                '<div class="empty-state">No valid recipe data is available for trends.</div>',
+                (
+                    '<div class="empty-state">No valid recipe data is available '
+                    f'for {html.escape(insights_bean)} yet.</div>'
+                ),
                 unsafe_allow_html=True,
             )
         else:
@@ -1536,11 +1577,15 @@ with insights_tab:
 
             with st.container(border=True):
                 st.markdown(
-                    '<div class="chart-label">Recipe &amp; Result Trends</div>',
+                    (
+                        '<div class="chart-label">'
+                        f'{html.escape(insights_bean)} Trends</div>'
+                    ),
                     unsafe_allow_html=True,
                 )
                 st.caption(
-                    "Each line is scaled from 0–100 using its own recorded range. "
+                    f"Showing {insights_bean} only. Each line is scaled from 0–100 "
+                    "using this bean's recorded range. "
                     "Hover a point to see the actual value."
                 )
                 st.altair_chart(
