@@ -1,0 +1,361 @@
+- generic [ref=f1e6]:
+  - generic [ref=f1e13]:
+    - generic [ref=f1e14]: Zach's Espresso Tracker
+    - generic [ref=f1e15]: Dial in, log, and learn from every shot.
+  - generic [ref=f1e17]:
+    - tablist [ref=f1e19]:
+      - tab "Log Shot" [ref=f1e20] [cursor=pointer]:
+        - paragraph [ref=f1e22]: Log Shot
+      - tab "History" [ref=f1e23] [cursor=pointer]:
+        - paragraph [ref=f1e25]: History
+      - tab "Insights" [active] [selected] [ref=f1e26] [cursor=pointer]:
+        - paragraph [ref=f1e28]: Insights
+    - tabpanel "Insights" [ref=f1e248]:
+      - generic [ref=f1e249]:
+        - generic [ref=f1e254]: Insights
+        - generic [ref=f1e259]: See how each bean responds as you dial it in.
+        - generic [ref=f1e261]:
+          - generic [ref=f1e266]: Score Over Time — All Beans
+          - paragraph [ref=f1e271]: Every rated shot, colored by bean, to track overall progress.
+          - generic [ref=f1e274]:
+            - generic [ref=f1e276]:
+              - button "Show data" [ref=f1e279] [cursor=pointer]:
+                - img [ref=f1e280]
+              - button "Fullscreen" [ref=f1e285] [cursor=pointer]:
+                - img [ref=f1e286]
+            - generic [ref=f1e289]:
+              - generic "Vega visualization" [ref=f1e290]:
+                - img [ref=f1e291]:
+                  - generic [ref=f1e296]:
+                    - generic "X-axis for a time scale with values from June 20 to July 2" [ref=f1e300]:
+                      - generic [ref=f1e302]:
+                        - generic:
+                          - generic: Jun 20
+                          - generic: Jun 20
+                          - generic: Jun 21
+                          - generic: Jun 21
+                          - generic: Jun 22
+                          - generic: Jun 22
+                          - generic: Jun 23
+                          - generic: Jun 23
+                          - generic: Jun 24
+                          - generic: Jun 24
+                          - generic: Jun 25
+                          - generic: Jun 25
+                          - generic: Jun 26
+                          - generic: Jun 26
+                          - generic: Jun 27
+                          - generic: Jun 27
+                          - generic: Jun 28
+                          - generic: Jun 28
+                          - generic: Jun 29
+                          - generic: Jun 29
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 2
+                    - generic "Y-axis titled 'Score' for a linear scale with values from 0 to 10" [ref=f1e303]:
+                      - generic [ref=f1e305]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "2"
+                          - generic: "4"
+                          - generic: "6"
+                          - generic: "8"
+                          - generic: "10"
+                        - generic:
+                          - generic: Score
+                    - generic [ref=f1e306]:
+                      - 'generic "date: Jun 30; Score: 2; : Las Brisa’s pink bourbon; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e311]'
+                      - 'generic "date: Jun 20; Score: 4; : Highland select; Date: Jun 20, 2026; Bean: Highland select" [ref=f1e316]'
+                    - generic [ref=f1e317]:
+                      - 'generic "date: Jul 2; Score: 6; : Las Brisa’s pink bourbon; Date: Jul 02, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e318]'
+                      - 'generic "date: Jul 1; Score: 6; : Las Brisa’s pink bourbon; Date: Jul 01, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e319]'
+                      - 'generic "date: Jun 30; Score: 2; : Las Brisa’s pink bourbon; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e320]'
+                      - 'generic "date: Jun 25; Score: 3; : Highland select; Date: Jun 25, 2026; Bean: Highland select" [ref=f1e321]'
+                      - 'generic "date: Jun 24; Score: 4; : Highland select; Date: Jun 24, 2026; Bean: Highland select" [ref=f1e322]'
+                      - 'generic "date: Jun 23; Score: 6; : Highland select; Date: Jun 23, 2026; Bean: Highland select" [ref=f1e323]'
+                      - 'generic "date: Jun 22; Score: 6; : Highland select; Date: Jun 22, 2026; Bean: Highland select" [ref=f1e324]'
+                      - 'generic "date: Jun 22; Score: 6; : Highland select; Date: Jun 22, 2026; Bean: Highland select" [ref=f1e325]'
+                      - 'generic "date: Jun 21; Score: 2; : Highland select; Date: Jun 21, 2026; Bean: Highland select" [ref=f1e326]'
+                      - 'generic "date: Jun 20; Score: 4; : Highland select; Date: Jun 20, 2026; Bean: Highland select" [ref=f1e327]'
+                    - 'generic "Symbol legend titled '' '' for fill color and stroke color with 2 values: Highland select, Las Brisa’s pink bourbon" [ref=f1e328]':
+                      - generic [ref=f1e334]:
+                        - generic [ref=f1e337]:
+                          - generic:
+                            - generic: Highland select
+                        - generic [ref=f1e340]:
+                          - generic:
+                            - generic: Las Brisa’s pink bourbon
+              - group "Click to view actions":
+                - img [ref=f1e342] [cursor=pointer]
+        - generic [ref=f1e347]:
+          - paragraph [ref=f1e351]: Bean
+          - generic [ref=f1e353]:
+            - generic [ref=f1e354]:
+              - generic [ref=f1e355]: Las Brisa’s pink bourbon
+              - combobox "Selected Las Brisa’s pink bourbon. Bean" [ref=f1e357]
+            - img "open" [ref=f1e359]
+        - generic [ref=f1e365]:
+          - generic [ref=f1e366]:
+            - generic [ref=f1e367]: Shots Logged
+            - generic [ref=f1e368]: "3"
+          - generic [ref=f1e369]:
+            - generic [ref=f1e370]: Average Score
+            - generic [ref=f1e371]: 4.7 / 10
+          - generic [ref=f1e372]:
+            - generic [ref=f1e373]: Average Ratio
+            - generic [ref=f1e374]: 2.39:1
+        - generic [ref=f1e376]:
+          - generic [ref=f1e381]: Las Brisa’s pink bourbon Trends
+          - paragraph [ref=f1e386]: Showing Las Brisa’s pink bourbon only, in each metric's real units. Dashed lines are a 3-shot rolling average.
+          - generic [ref=f1e389]:
+            - generic [ref=f1e391]:
+              - button "Show data" [ref=f1e394] [cursor=pointer]:
+                - img [ref=f1e395]
+              - button "Fullscreen" [ref=f1e400] [cursor=pointer]:
+                - img [ref=f1e401]
+            - generic [ref=f1e404]:
+              - generic "Vega visualization" [ref=f1e405]:
+                - img [ref=f1e406]:
+                  - generic [ref=f1e411]:
+                    - generic "X-axis for a time scale with values from June 30 to July 2" [ref=f1e415]:
+                      - generic [ref=f1e417]:
+                        - generic:
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 2
+                    - generic "Y-axis titled 'Brew Ratio' for a linear scale with values from 0.0 to 2.8" [ref=f1e418]:
+                      - generic [ref=f1e420]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "1"
+                          - generic: "2"
+                        - generic:
+                          - generic: Brew Ratio
+                    - 'generic "date: Jun 30; Brew Ratio: 2.05882352941; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e422]'
+                    - generic [ref=f1e423]:
+                      - 'generic "date: Jun 30; Brew Ratio: 2.05882352941; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e424]'
+                      - 'generic "date: Jul 1; Brew Ratio: 2.41176470588; Date: Jul 01, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e425]'
+                      - 'generic "date: Jul 2; Brew Ratio: 2.70588235294; Date: Jul 02, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e426]'
+                    - 'generic "date: Jun 30, 2026; rolling_value: 2.05882352941" [ref=f1e428]'
+              - group "Click to view actions":
+                - img [ref=f1e430] [cursor=pointer]
+          - generic [ref=f1e436]:
+            - generic [ref=f1e438]:
+              - button "Show data" [ref=f1e441] [cursor=pointer]:
+                - img [ref=f1e442]
+              - button "Fullscreen" [ref=f1e447] [cursor=pointer]:
+                - img [ref=f1e448]
+            - generic [ref=f1e451]:
+              - generic "Vega visualization" [ref=f1e452]:
+                - img [ref=f1e453]:
+                  - generic [ref=f1e458]:
+                    - generic "X-axis for a time scale with values from June 30 to July 2" [ref=f1e462]:
+                      - generic [ref=f1e464]:
+                        - generic:
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 2
+                    - generic "Y-axis titled 'Brew Time (s)' for a linear scale with values from 0 to 26" [ref=f1e465]:
+                      - generic [ref=f1e467]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "10"
+                          - generic: "20"
+                        - generic:
+                          - generic: Brew Time (s)
+                    - 'generic "date: Jun 30; Brew Time (s): 25; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e469]'
+                    - generic [ref=f1e470]:
+                      - 'generic "date: Jun 30; Brew Time (s): 25; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e471]'
+                      - 'generic "date: Jul 1; Brew Time (s): 20; Date: Jul 01, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e472]'
+                      - 'generic "date: Jul 2; Brew Time (s): 24; Date: Jul 02, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e473]'
+              - group "Click to view actions":
+                - img [ref=f1e475] [cursor=pointer]
+          - generic [ref=f1e481]:
+            - generic [ref=f1e483]:
+              - button "Show data" [ref=f1e486] [cursor=pointer]:
+                - img [ref=f1e487]
+              - button "Fullscreen" [ref=f1e492] [cursor=pointer]:
+                - img [ref=f1e493]
+            - generic [ref=f1e496]:
+              - generic "Vega visualization" [ref=f1e497]:
+                - img [ref=f1e498]:
+                  - generic [ref=f1e503]:
+                    - generic "X-axis for a time scale with values from June 30 to July 2" [ref=f1e507]:
+                      - generic [ref=f1e509]:
+                        - generic:
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 2
+                    - generic "Y-axis titled 'Score' for a linear scale with values from 0 to 6" [ref=f1e510]:
+                      - generic [ref=f1e512]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "2"
+                          - generic: "4"
+                          - generic: "6"
+                        - generic:
+                          - generic: Score
+                    - 'generic "date: Jun 30; Score: 2; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e514]'
+                    - generic [ref=f1e515]:
+                      - 'generic "date: Jun 30; Score: 2; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e516]'
+                      - 'generic "date: Jul 1; Score: 6; Date: Jul 01, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e517]'
+                      - 'generic "date: Jul 2; Score: 6; Date: Jul 02, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e518]'
+                    - 'generic "date: Jun 30, 2026; rolling_value: 2" [ref=f1e520]'
+              - group "Click to view actions":
+                - img [ref=f1e522] [cursor=pointer]
+          - generic [ref=f1e528]:
+            - generic [ref=f1e530]:
+              - button "Show data" [ref=f1e533] [cursor=pointer]:
+                - img [ref=f1e534]
+              - button "Fullscreen" [ref=f1e539] [cursor=pointer]:
+                - img [ref=f1e540]
+            - generic [ref=f1e543]:
+              - generic "Vega visualization" [ref=f1e544]:
+                - img [ref=f1e545]:
+                  - generic [ref=f1e550]:
+                    - generic "X-axis for a time scale with values from June 30 to July 2" [ref=f1e554]:
+                      - generic [ref=f1e556]:
+                        - generic:
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jun 30
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 1
+                          - generic: Jul 2
+                    - generic "Y-axis titled 'Grind Size' for a linear scale with values from 0 to 80" [ref=f1e557]:
+                      - generic [ref=f1e559]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "20"
+                          - generic: "40"
+                          - generic: "60"
+                          - generic: "80"
+                        - generic:
+                          - generic: Grind Size
+                    - 'generic "date: Jun 30; Grind Size: 7; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e561]'
+                    - generic [ref=f1e562]:
+                      - 'generic "date: Jun 30; Grind Size: 7; Date: Jun 30, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e563]'
+                      - 'generic "date: Jul 1; Grind Size: 75; Date: Jul 01, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e564]'
+                      - 'generic "date: Jul 2; Grind Size: 75; Date: Jul 02, 2026; Bean: Las Brisa’s pink bourbon" [ref=f1e565]'
+              - group "Click to view actions":
+                - img [ref=f1e567] [cursor=pointer]
+        - generic [ref=f1e572]:
+          - generic [ref=f1e577]: Brew Ratio vs. Score
+          - paragraph [ref=f1e582]: Each point is a Las Brisa’s pink bourbon shot — look for the ratio that clusters with your highest scores.
+          - generic [ref=f1e585]:
+            - generic [ref=f1e587]:
+              - button "Show data" [ref=f1e590] [cursor=pointer]:
+                - img [ref=f1e591]
+              - button "Fullscreen" [ref=f1e596] [cursor=pointer]:
+                - img [ref=f1e597]
+            - generic [ref=f1e600]:
+              - generic "Vega visualization" [ref=f1e601]:
+                - img [ref=f1e602]:
+                  - generic [ref=f1e607]:
+                    - generic "X-axis titled 'Brew Ratio' for a linear scale with values from 0.0 to 2.8" [ref=f1e614]:
+                      - generic [ref=f1e616]:
+                        - generic:
+                          - generic: "0.0"
+                          - generic: "0.1"
+                          - generic: "0.2"
+                          - generic: "0.3"
+                          - generic: "0.4"
+                          - generic: "0.5"
+                          - generic: "0.6"
+                          - generic: "0.7"
+                          - generic: "0.8"
+                          - generic: "0.9"
+                          - generic: "1.0"
+                          - generic: "1.1"
+                          - generic: "1.2"
+                          - generic: "1.3"
+                          - generic: "1.4"
+                          - generic: "1.5"
+                          - generic: "1.6"
+                          - generic: "1.7"
+                          - generic: "1.8"
+                          - generic: "1.9"
+                          - generic: "2.0"
+                          - generic: "2.1"
+                          - generic: "2.2"
+                          - generic: "2.3"
+                          - generic: "2.4"
+                          - generic: "2.5"
+                          - generic: "2.6"
+                          - generic: "2.7"
+                          - generic: "2.8"
+                        - generic:
+                          - generic: Brew Ratio
+                    - generic "Y-axis titled 'Score' for a linear scale with values from 0 to 10" [ref=f1e617]:
+                      - generic [ref=f1e619]:
+                        - generic:
+                          - generic: "0"
+                          - generic: "2"
+                          - generic: "4"
+                          - generic: "6"
+                          - generic: "8"
+                          - generic: "10"
+                        - generic:
+                          - generic: Score
+                    - generic [ref=f1e620]:
+                      - 'generic "Brew Ratio: 2.05882352941; Score: 2; Date: Jun 30, 2026" [ref=f1e621]'
+                      - 'generic "Brew Ratio: 2.41176470588; Score: 6; Date: Jul 01, 2026" [ref=f1e622]'
+                      - 'generic "Brew Ratio: 2.70588235294; Score: 6; Date: Jul 02, 2026" [ref=f1e623]'
+              - group "Click to view actions":
+                - img [ref=f1e625] [cursor=pointer]

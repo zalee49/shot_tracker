@@ -1,6 +1,7 @@
 import base64
 import html
 import math
+import re
 import streamlit as st
 import pandas as pd
 import requests
@@ -354,66 +355,42 @@ def history_metric_grid(shot, previous_shot):
     return f'<div class="history-metrics">{"".join(items)}</div>'
 
 
-def normalized_trend_rows(dataframe, value_column, metric, display_value):
-    metric_df = dataframe.reindex(columns=["date", value_column, "bean_name"]).dropna().copy()
-    if metric_df.empty:
-        return metric_df
-
-    minimum = metric_df[value_column].min()
-    maximum = metric_df[value_column].max()
-    if minimum == maximum:
-        metric_df["normalized_value"] = 50.0
-    else:
-        metric_df["normalized_value"] = (
-            (metric_df[value_column] - minimum) / (maximum - minimum) * 100
-        )
-
-    metric_df["Metric"] = metric
-    metric_df["Value"] = metric_df[value_column].map(display_value)
-    return metric_df[["date", "bean_name", "Metric", "Value", "normalized_value"]]
+def parse_grind_size(value):
+    text = normalize_text(value)
+    if not text:
+        return None
+    match = re.search(r"-?(?:\d+\.\d+|\.\d+|\d+)", text)
+    if not match:
+        return None
+    return float(match.group())
 
 
-def normalized_target_value(target, observed_values):
-    minimum = observed_values.min()
-    maximum = observed_values.max()
-    if minimum == maximum:
-        return 50.0
-    normalized = (target - minimum) / (maximum - minimum) * 100
-    return min(max(normalized, 0.0), 100.0)
-
-
-def combined_trend_chart(chart_df, target_df=None):
-    metric_order = ["Brew Ratio", "Brew Time", "Score"]
-    metric_styles = {
-        "Brew Ratio": ("#2F6B57", [1, 0], "circle"),
-        "Brew Time": ("#376A8A", [8, 4], "square"),
-        "Score": ("#A76D28", [2, 4], "diamond"),
-    }
-    present_metrics = [
-        metric for metric in metric_order if metric in set(chart_df["Metric"])
-    ]
-    colors = [metric_styles[metric][0] for metric in present_metrics]
-    dashes = [metric_styles[metric][1] for metric in present_metrics]
-    shapes = [metric_styles[metric][2] for metric in present_metrics]
-
-    base = alt.Chart(chart_df).encode(
-        x=alt.X(
-            "date:T",
-            title=None,
-            axis=alt.Axis(
-                grid=False,
-                domain=False,
-                tickColor="#DDD8D1",
-                labelColor="#6F6A63",
-                format="%b %-d",
-            ),
+def trend_axis_x():
+    return alt.X(
+        "date:T",
+        title=None,
+        axis=alt.Axis(
+            grid=False,
+            domain=False,
+            tickColor="#DDD8D1",
+            labelColor="#6F6A63",
+            format="%b %-d",
         ),
+    )
+
+
+def metric_trend_chart(metric_df, value_column, y_title, color, y_format, show_rolling=False):
+    """Line+point chart for a single metric, plotted in its own real-value units."""
+    metric_df = metric_df.dropna(subset=["date", value_column])
+    if metric_df.empty:
+        return None
+
+    base = alt.Chart(metric_df).encode(
+        x=trend_axis_x(),
         y=alt.Y(
-            "normalized_value:Q",
-            title="Relative trend (0–100)",
-            scale=alt.Scale(domain=[0, 100]),
+            f"{value_column}:Q",
+            title=y_title,
             axis=alt.Axis(
-                values=[0, 25, 50, 75, 100],
                 gridColor="#EEEAE5",
                 domain=False,
                 tickColor="#DDD8D1",
@@ -421,68 +398,111 @@ def combined_trend_chart(chart_df, target_df=None):
                 titleColor="#6F6A63",
             ),
         ),
-        detail="Metric:N",
         tooltip=[
             alt.Tooltip("date:T", title="Date", format="%b %d, %Y"),
             alt.Tooltip("bean_name:N", title="Bean"),
-            alt.Tooltip("Metric:N", title="Metric"),
-            alt.Tooltip("Value:N", title="Value"),
+            alt.Tooltip(f"{value_column}:Q", title=y_title, format=y_format),
         ],
     )
+    chart = base.mark_line(strokeWidth=2.5, color=color) + base.mark_point(
+        filled=True, size=62, color=color
+    )
 
-    lines = base.mark_line(strokeWidth=2.5).encode(
-        color=alt.Color(
-            "Metric:N",
-            scale=alt.Scale(domain=present_metrics, range=colors),
-            legend=alt.Legend(
-                title=None,
-                orient="top",
-                direction="horizontal",
-                columns=3,
-                symbolStrokeWidth=3,
+    if show_rolling and len(metric_df) >= 3:
+        rolling_df = metric_df.sort_values("date").copy()
+        rolling_df["rolling_value"] = (
+            rolling_df[value_column].rolling(window=3, min_periods=1).mean()
+        )
+        rolling_line = alt.Chart(rolling_df).mark_line(
+            strokeWidth=1.5,
+            strokeDash=[4, 3],
+            color=color,
+            opacity=0.45,
+        ).encode(x="date:T", y=f"rolling_value:Q")
+        chart = chart + rolling_line
+
+    return chart.properties(height=150)
+
+
+def ratio_score_scatter_chart(scatter_df):
+    scatter_df = scatter_df.dropna(subset=["Brew Ratio", "rating"])
+    if scatter_df.empty:
+        return None
+
+    chart = alt.Chart(scatter_df).mark_circle(
+        size=90,
+        opacity=0.75,
+        color="#7A4EA6",
+    ).encode(
+        x=alt.X(
+            "Brew Ratio:Q",
+            title="Brew Ratio",
+            axis=alt.Axis(
+                gridColor="#EEEAE5",
+                domain=False,
+                tickColor="#DDD8D1",
+                labelColor="#6F6A63",
+                titleColor="#6F6A63",
             ),
         ),
-        strokeDash=alt.StrokeDash(
-            "Metric:N",
-            scale=alt.Scale(domain=present_metrics, range=dashes),
-            legend=None,
+        y=alt.Y(
+            "rating:Q",
+            title="Score",
+            scale=alt.Scale(domain=[0, 10]),
+            axis=alt.Axis(
+                gridColor="#EEEAE5",
+                domain=False,
+                tickColor="#DDD8D1",
+                labelColor="#6F6A63",
+                titleColor="#6F6A63",
+            ),
         ),
+        tooltip=[
+            alt.Tooltip("date:T", title="Date", format="%b %d, %Y"),
+            alt.Tooltip("Brew Ratio:Q", title="Brew Ratio", format=".2f"),
+            alt.Tooltip("rating:Q", title="Score", format="g"),
+        ],
     )
-    points = base.mark_point(filled=True, size=62).encode(
+    return chart.properties(height=240)
+
+
+def all_beans_score_chart(shots):
+    df = pd.DataFrame(shots).reindex(columns=SHOT_FIELDS)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
+    df = df[df["date"].notna() & df["rating"].notna()]
+    if df.empty:
+        return None
+
+    chart = alt.Chart(df).mark_line(
+        strokeWidth=2,
+        point=alt.OverlayMarkDef(filled=True, size=55),
+    ).encode(
+        x=trend_axis_x(),
+        y=alt.Y(
+            "rating:Q",
+            title="Score",
+            scale=alt.Scale(domain=[0, 10]),
+            axis=alt.Axis(
+                gridColor="#EEEAE5",
+                domain=False,
+                tickColor="#DDD8D1",
+                labelColor="#6F6A63",
+                titleColor="#6F6A63",
+            ),
+        ),
         color=alt.Color(
-            "Metric:N",
-            scale=alt.Scale(domain=present_metrics, range=colors),
-            legend=None,
+            "bean_name:N",
+            title=None,
+            legend=alt.Legend(orient="bottom", columns=3),
         ),
-        shape=alt.Shape(
-            "Metric:N",
-            scale=alt.Scale(domain=present_metrics, range=shapes),
-            legend=None,
-        ),
+        tooltip=[
+            alt.Tooltip("date:T", title="Date", format="%b %d, %Y"),
+            alt.Tooltip("bean_name:N", title="Bean"),
+            alt.Tooltip("rating:Q", title="Score", format="g"),
+        ],
     )
-    chart = lines + points
-
-    if target_df is not None and not target_df.empty:
-        target_rule = alt.Chart(target_df).mark_rule(
-            color="#8A4B32",
-            strokeDash=[5, 5],
-            strokeWidth=1.5,
-        ).encode(y="normalized_value:Q")
-        target_label = alt.Chart(target_df).mark_text(
-            align="right",
-            baseline="bottom",
-            dx=-4,
-            dy=-4,
-            color="#8A4B32",
-            fontSize=11,
-        ).encode(
-            x="date:T",
-            y="normalized_value:Q",
-            text="label:N",
-        )
-        chart = chart + target_rule + target_label
-
-    return chart.properties(height=320)
+    return chart.properties(height=260)
 
 
 st.set_page_config(
@@ -1464,6 +1484,16 @@ with insights_tab:
             unsafe_allow_html=True,
         )
     else:
+        all_beans_chart = all_beans_score_chart(shots)
+        if all_beans_chart is not None:
+            with st.container(border=True):
+                st.markdown(
+                    '<div class="chart-label">Score Over Time — All Beans</div>',
+                    unsafe_allow_html=True,
+                )
+                st.caption("Every rated shot, colored by bean, to track overall progress.")
+                st.altair_chart(all_beans_chart, width="stretch")
+
         bean_options = list(saved_beans.keys())
         if "insights_bean" in st.session_state:
             matched_bean = saved_bean_name(
@@ -1530,8 +1560,14 @@ with insights_tab:
         ratio_df["Brew Ratio"] = ratio_df["yield"] / ratio_df["dose"]
         brew_time_df = df[df["date"].notna() & df["brew_time"].notna()].copy()
         rating_df = df[df["date"].notna() & df["rating"].notna()].copy()
+        grind_df = df[df["date"].notna()].copy()
+        grind_df["grind_value"] = grind_df["grind_size"].map(parse_grind_size)
+        grind_df = grind_df[grind_df["grind_value"].notna()]
+        scatter_df = ratio_df[["date", "Brew Ratio"]].merge(
+            rating_df[["date", "rating"]], on="date", how="inner"
+        )
 
-        if ratio_df.empty and brew_time_df.empty and rating_df.empty:
+        if ratio_df.empty and brew_time_df.empty and rating_df.empty and grind_df.empty:
             st.markdown(
                 (
                     '<div class="empty-state">No valid recipe data is available '
@@ -1540,46 +1576,6 @@ with insights_tab:
                 unsafe_allow_html=True,
             )
         else:
-            trend_frames = [
-                normalized_trend_rows(
-                    ratio_df,
-                    "Brew Ratio",
-                    "Brew Ratio",
-                    lambda value: f"{value:.2f}",
-                ),
-                normalized_trend_rows(
-                    brew_time_df,
-                    "brew_time",
-                    "Brew Time",
-                    lambda value: f"{value:g} s",
-                ),
-                normalized_trend_rows(
-                    rating_df,
-                    "rating",
-                    "Score",
-                    lambda value: f"{value:g}/10",
-                ),
-            ]
-            combined_df = pd.concat(
-                [frame for frame in trend_frames if not frame.empty],
-                ignore_index=True,
-            )
-
-            target_df = None
-            if not ratio_df.empty:
-                target_df = pd.DataFrame(
-                    {
-                        "date": [combined_df["date"].max()],
-                        "normalized_value": [
-                            normalized_target_value(
-                                target_ratio,
-                                ratio_df["Brew Ratio"],
-                            )
-                        ],
-                        "label": [f"Target ratio {target_ratio:.2f}"],
-                    }
-                )
-
             with st.container(border=True):
                 st.markdown(
                     (
@@ -1589,11 +1585,38 @@ with insights_tab:
                     unsafe_allow_html=True,
                 )
                 st.caption(
-                    f"Showing {insights_bean} only. Each line is scaled from 0–100 "
-                    "using this bean's recorded range. "
-                    "Hover a point to see the actual value."
+                    f"Showing {insights_bean} only, in each metric's real units. "
+                    "Dashed lines are a 3-shot rolling average."
                 )
-                st.altair_chart(
-                    combined_trend_chart(combined_df, target_df),
-                    width="stretch",
-                )
+                metric_charts = [
+                    metric_trend_chart(
+                        ratio_df, "Brew Ratio", "Brew Ratio", "#2F6B57", ".2f",
+                        show_rolling=True,
+                    ),
+                    metric_trend_chart(
+                        brew_time_df, "brew_time", "Brew Time (s)", "#376A8A", ".0f",
+                    ),
+                    metric_trend_chart(
+                        rating_df, "rating", "Score", "#A76D28", "g",
+                        show_rolling=True,
+                    ),
+                    metric_trend_chart(
+                        grind_df, "grind_value", "Grind Size", "#8A4B32", "g",
+                    ),
+                ]
+                for metric_chart in metric_charts:
+                    if metric_chart is not None:
+                        st.altair_chart(metric_chart, width="stretch")
+
+            scatter_chart = ratio_score_scatter_chart(scatter_df)
+            if scatter_chart is not None:
+                with st.container(border=True):
+                    st.markdown(
+                        '<div class="chart-label">Brew Ratio vs. Score</div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.caption(
+                        f"Each point is a {insights_bean} shot — "
+                        "look for the ratio that clusters with your highest scores."
+                    )
+                    st.altair_chart(scatter_chart, width="stretch")

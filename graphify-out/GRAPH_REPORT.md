@@ -1,7 +1,7 @@
 # Graph Report - shot_tracker  (2026-07-02)
 
 ## Corpus Check
-- 3 files · ~4,313 words
+- 3 files · ~4,213 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6ebd7439`
+- Built from commit: `d489e61d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
