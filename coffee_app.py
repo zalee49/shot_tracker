@@ -1108,7 +1108,7 @@ with log_tab:
     else:
         st.session_state.selected_bean = bean_options[1] if saved_beans else "New bean"
 
-    bean_col, settings_col = st.columns([3, 1])
+    bean_col, settings_col = st.columns([3, 1], vertical_alignment="bottom")
     with bean_col:
         selected_bean = st.selectbox("Bean", bean_options, key="selected_bean")
     with settings_col:
@@ -1403,10 +1403,7 @@ with history_tab:
                     unsafe_allow_html=True,
                 )
 
-                with st.expander(
-                    f"{shot_bean} · {shot_date_display} · {ratio_display}",
-                    expanded=False,
-                ):
+                with st.expander("Details", expanded=False):
                     st.markdown(
                         '<div class="shot-summary">'
                         f'<span class="status-pill {badge_cls}">{html.escape(short_flag)}</span>'
