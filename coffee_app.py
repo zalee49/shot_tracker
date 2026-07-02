@@ -9,7 +9,16 @@ from datetime import date
 
 ROAST_LEVELS = ["Light", "Medium", "Medium-Dark", "Dark"]
 PROCESS_METHODS = ["Washed", "Natural", "Honey", "Other"]
-GRIND_DIRECTIONS = ["First shot with this grind", "Same", "Coarser", "Finer"]
+ADJUSTMENT_OPTIONS = [
+    "First shot with this grind",
+    "Same",
+    "Coarser",
+    "Finer",
+    "Higher Dose",
+    "Lower Dose",
+    "More Yield",
+    "Less Yield",
+]
 SHOT_FIELDS = [
     "id",
     "date",
@@ -1247,7 +1256,7 @@ with log_tab:
                     placeholder="11 or 2.5 turns",
                 )
             with row3_col2:
-                grind_direction = st.selectbox("Adjustment vs Last Shot", GRIND_DIRECTIONS)
+                grind_direction = st.multiselect("Adjustments vs Last Shot", ADJUSTMENT_OPTIONS)
 
             st.markdown('<div class="subsection-label">Taste</div>', unsafe_allow_html=True)
             rating = st.select_slider("Score", options=list(range(1, 11)), value=6)
@@ -1287,7 +1296,7 @@ with log_tab:
                     "yield": yield_,
                     "brew_time": brew_time,
                     "grind_size": grind_size,
-                    "grind_direction": grind_direction,
+                    "grind_direction": ", ".join(grind_direction),
                     "temperature": temperature,
                     "rating": rating,
                     "tasting_notes": tasting_notes or "",
@@ -1305,9 +1314,8 @@ with log_tab:
                 st.toast("The shot was not saved.", icon=":material/warning:")
             else:
                 ratio = yield_ / dose
-                flag = ratio_flag(yield_, dose, target_ratio)
                 st.session_state.save_success = (
-                    f"Shot logged. Brew ratio: {ratio:.2f}:1 — {flag}"
+                    f"Shot logged. Brew ratio: {ratio:.2f}:1"
                 )
                 st.session_state.pending_quick_log_bean = normalized_bean_name
                 st.rerun()
@@ -1417,7 +1425,7 @@ with history_tab:
                     st.markdown(
                         shot_prop_grid([
                             ("Grind Size", shot.get("grind_size") or "—"),
-                            ("Direction", shot.get("grind_direction") or "—"),
+                            ("Adjustments", shot.get("grind_direction") or "—"),
                             ("Temperature", temperature_display),
                             ("Coffee", coffee_display),
                             ("Tasting Notes", shot.get("tasting_notes") or "—"),

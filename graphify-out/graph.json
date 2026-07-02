@@ -16,7 +16,7 @@
       "label": "get_headers()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L22",
+      "source_location": "L50",
       "id": "coffee_app_get_headers",
       "community": 2,
       "norm_label": "get_headers()"
@@ -25,16 +25,61 @@
       "label": "get_url()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L31",
+      "source_location": "L59",
       "id": "coffee_app_get_url",
       "community": 2,
       "norm_label": "get_url()"
     },
     {
+      "label": "normalize_text()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L63",
+      "id": "coffee_app_normalize_text",
+      "community": 4,
+      "norm_label": "normalize_text()"
+    },
+    {
+      "label": "bean_key()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L69",
+      "id": "coffee_app_bean_key",
+      "community": 4,
+      "norm_label": "bean_key()"
+    },
+    {
+      "label": "coerce_number()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L73",
+      "id": "coffee_app_coerce_number",
+      "community": 2,
+      "norm_label": "coerce_number()"
+    },
+    {
+      "label": "normalize_date()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L95",
+      "id": "coffee_app_normalize_date",
+      "community": 5,
+      "norm_label": "normalize_date()"
+    },
+    {
+      "label": "normalize_shot()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L106",
+      "id": "coffee_app_normalize_shot",
+      "community": 5,
+      "norm_label": "normalize_shot()"
+    },
+    {
       "label": "load_data()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L35",
+      "source_location": "L129",
       "id": "coffee_app_load_data",
       "community": 2,
       "norm_label": "load_data()"
@@ -43,7 +88,7 @@
       "label": "save_shot()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L43",
+      "source_location": "L159",
       "id": "coffee_app_save_shot",
       "community": 2,
       "norm_label": "save_shot()"
@@ -52,7 +97,7 @@
       "label": "delete_shot()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L51",
+      "source_location": "L169",
       "id": "coffee_app_delete_shot",
       "community": 2,
       "norm_label": "delete_shot()"
@@ -61,52 +106,97 @@
       "label": "get_saved_beans()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L58",
+      "source_location": "L200",
       "id": "coffee_app_get_saved_beans",
-      "community": 0,
+      "community": 4,
       "norm_label": "get_saved_beans()"
     },
     {
-      "label": "star_rating()",
+      "label": "saved_bean_name()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L67",
-      "id": "coffee_app_star_rating",
+      "source_location": "L213",
+      "id": "coffee_app_saved_bean_name",
+      "community": 4,
+      "norm_label": "saved_bean_name()"
+    },
+    {
+      "label": "shots_for_bean()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L221",
+      "id": "coffee_app_shots_for_bean",
+      "community": 4,
+      "norm_label": "shots_for_bean()"
+    },
+    {
+      "label": "score_text()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L230",
+      "id": "coffee_app_score_text",
       "community": 0,
-      "norm_label": "star_rating()"
+      "norm_label": "score_text()"
     },
     {
       "label": "fmt()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L73",
+      "source_location": "L236",
       "id": "coffee_app_fmt",
-      "community": 0,
+      "community": 7,
       "norm_label": "fmt()"
     },
     {
       "label": "safe_index()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L77",
+      "source_location": "L242",
       "id": "coffee_app_safe_index",
       "community": 0,
       "norm_label": "safe_index()"
     },
     {
+      "label": "widget_default()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L249",
+      "id": "coffee_app_widget_default",
+      "community": 2,
+      "norm_label": "widget_default()"
+    },
+    {
+      "label": "display_date()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L257",
+      "id": "coffee_app_display_date",
+      "community": 5,
+      "norm_label": "display_date()"
+    },
+    {
+      "label": "brew_ratio()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L264",
+      "id": "coffee_app_brew_ratio",
+      "community": 6,
+      "norm_label": "brew_ratio()"
+    },
+    {
       "label": "ratio_flag()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L84",
+      "source_location": "L270",
       "id": "coffee_app_ratio_flag",
-      "community": 0,
+      "community": 6,
       "norm_label": "ratio_flag()"
     },
     {
       "label": "ratio_badge_class()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L97",
+      "source_location": "L283",
       "id": "coffee_app_ratio_badge_class",
       "community": 0,
       "norm_label": "ratio_badge_class()"
@@ -115,19 +205,73 @@
       "label": "shot_prop_grid()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L103",
+      "source_location": "L289",
       "id": "coffee_app_shot_prop_grid",
       "community": 0,
       "norm_label": "shot_prop_grid()"
     },
     {
-      "label": "notion_line_chart()",
+      "label": "get_previous_shots_by_id()",
       "file_type": "code",
       "source_file": "coffee_app.py",
-      "source_location": "L112",
-      "id": "coffee_app_notion_line_chart",
+      "source_location": "L298",
+      "id": "coffee_app_get_previous_shots_by_id",
+      "community": 4,
+      "norm_label": "get_previous_shots_by_id()"
+    },
+    {
+      "label": "history_metric_grid()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L316",
+      "id": "coffee_app_history_metric_grid",
+      "community": 7,
+      "norm_label": "history_metric_grid()"
+    },
+    {
+      "label": "normalized_trend_rows()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L357",
+      "id": "coffee_app_normalized_trend_rows",
       "community": 0,
-      "norm_label": "notion_line_chart()"
+      "norm_label": "normalized_trend_rows()"
+    },
+    {
+      "label": "normalized_target_value()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L376",
+      "id": "coffee_app_normalized_target_value",
+      "community": 0,
+      "norm_label": "normalized_target_value()"
+    },
+    {
+      "label": "combined_trend_chart()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L385",
+      "id": "coffee_app_combined_trend_chart",
+      "community": 0,
+      "norm_label": "combined_trend_chart()"
+    },
+    {
+      "label": "Return display bean names mapped to their most recent shot.",
+      "file_type": "rationale",
+      "source_file": "coffee_app.py",
+      "source_location": "L201",
+      "id": "coffee_app_rationale_201",
+      "community": 4,
+      "norm_label": "return display bean names mapped to their most recent shot."
+    },
+    {
+      "label": "Map each shot id to its chronologically previous shot for the same bean.      It",
+      "file_type": "rationale",
+      "source_file": "coffee_app.py",
+      "source_location": "L299",
+      "id": "coffee_app_rationale_299",
+      "community": 4,
+      "norm_label": "map each shot id to its chronologically previous shot for the same bean.      it"
     },
     {
       "label": "AGENTS.md",
@@ -209,9 +353,67 @@
       "id": "claude_claude_md",
       "community": 3,
       "norm_label": "claude.md"
+    },
+    {
+      "label": "star_rating()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L67",
+      "community": 0,
+      "norm_label": "star_rating()",
+      "id": "coffee_app_star_rating"
+    },
+    {
+      "label": "notion_line_chart()",
+      "file_type": "code",
+      "source_file": "coffee_app.py",
+      "source_location": "L112",
+      "community": 0,
+      "norm_label": "notion_line_chart()",
+      "id": "coffee_app_notion_line_chart"
     }
   ],
   "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_bean_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L264",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_brew_ratio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L73",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_coerce_number",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L385",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_combined_trend_chart",
+      "confidence_score": 1.0
+    },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
@@ -221,6 +423,16 @@
       "confidence_score": 1.0,
       "source": "coffee_app",
       "target": "coffee_app_delete_shot"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L257",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_display_date",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -246,6 +458,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "coffee_app.py",
+      "source_location": "L298",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_get_previous_shots_by_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
       "source_location": "L56",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -266,11 +488,71 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "coffee_app.py",
+      "source_location": "L316",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_history_metric_grid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
       "source_location": "L33",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "coffee_app",
       "target": "coffee_app_load_data"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L95",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_normalize_date",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_normalize_shot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L63",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_normalize_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L376",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_normalized_target_value",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L357",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_normalized_trend_rows",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -308,9 +590,9 @@
       "source_file": "coffee_app.py",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "coffee_app",
-      "target": "coffee_app_safe_index",
-      "confidence_score": 1.0
+      "target": "coffee_app_safe_index"
     },
     {
       "relation": "contains",
@@ -326,6 +608,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "coffee_app.py",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_saved_bean_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L230",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_score_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
       "source_location": "L94",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -336,11 +638,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "coffee_app.py",
+      "source_location": "L221",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_shots_for_bean",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
       "source_location": "L65",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "coffee_app",
       "target": "coffee_app_star_rating"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L249",
+      "weight": 1.0,
+      "source": "coffee_app",
+      "target": "coffee_app_widget_default",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -407,6 +729,191 @@
       "confidence_score": 1.0,
       "source": "coffee_app_save_shot",
       "target": "coffee_app_get_url"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "coffee_app_bean_key",
+      "target": "coffee_app_normalize_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L205",
+      "weight": 1.0,
+      "source": "coffee_app_get_saved_beans",
+      "target": "coffee_app_normalize_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "coffee_app_normalize_shot",
+      "target": "coffee_app_normalize_text",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "source": "coffee_app_get_previous_shots_by_id",
+      "target": "coffee_app_bean_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L206",
+      "weight": 1.0,
+      "source": "coffee_app_get_saved_beans",
+      "target": "coffee_app_bean_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L214",
+      "weight": 1.0,
+      "source": "coffee_app_saved_bean_name",
+      "target": "coffee_app_bean_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L222",
+      "weight": 1.0,
+      "source": "coffee_app_shots_for_bean",
+      "target": "coffee_app_bean_key",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L170",
+      "weight": 1.0,
+      "source": "coffee_app_delete_shot",
+      "target": "coffee_app_coerce_number",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "coffee_app_normalize_shot",
+      "target": "coffee_app_coerce_number",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L250",
+      "weight": 1.0,
+      "source": "coffee_app_widget_default",
+      "target": "coffee_app_coerce_number",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L258",
+      "weight": 1.0,
+      "source": "coffee_app_display_date",
+      "target": "coffee_app_normalize_date",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "source": "coffee_app_normalize_shot",
+      "target": "coffee_app_normalize_date",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "coffee_app_load_data",
+      "target": "coffee_app_normalize_shot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L201",
+      "weight": 1.0,
+      "source": "coffee_app_rationale_201",
+      "target": "coffee_app_get_saved_beans",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L329",
+      "weight": 1.0,
+      "source": "coffee_app_history_metric_grid",
+      "target": "coffee_app_fmt",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L271",
+      "weight": 1.0,
+      "source": "coffee_app_ratio_flag",
+      "target": "coffee_app_brew_ratio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "coffee_app.py",
+      "source_location": "L299",
+      "weight": 1.0,
+      "source": "coffee_app_rationale_299",
+      "target": "coffee_app_get_previous_shots_by_id",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -480,5 +987,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "16ab6bf08c19eff4fbe20d54ecd5b86011f87b42"
+  "built_at_commit": "6ebd7439eb28e77da9c321c7179a4ff34f831d36"
 }
