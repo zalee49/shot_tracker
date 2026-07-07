@@ -4,9 +4,14 @@ Guidance for AI coding tools (Claude Code, Gemini, Cline, etc.) working in this 
 
 ## What this is
 
-A single-file Streamlit web app (`coffee_app.py`) for logging and analyzing espresso shots —
-"Zach's Espresso Shot Tracker". Data is persisted to a Supabase Postgres table named `shots`,
-accessed directly over Supabase's PostgREST HTTP API (not a Supabase client library).
+An espresso shot tracker ("Zach's Espresso Shot Tracker") with two apps sharing one Supabase
+Postgres table named `shots`, accessed over Supabase's PostgREST HTTP API:
+
+- **`web/`** — the production Next.js app (App Router + TypeScript + Tailwind + shadcn/ui +
+  Recharts). This is the primary app going forward; see `web/README.md` for setup, env vars,
+  the read-public/write-gated access model, and Vercel deploy notes.
+- **`coffee_app.py`** — the original single-file Streamlit app, kept as-is for reference.
+  The sections below describe it.
 
 ## Commands
 

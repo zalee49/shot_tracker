@@ -1,1 +1,6 @@
 .streamlit/secrets.toml
+
+# Local/generated artifacts
+.DS_Store
+.playwright-mcp/
+graphify-out/
