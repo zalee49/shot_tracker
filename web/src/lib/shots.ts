@@ -104,6 +104,15 @@ export function savedBeans(shots: Shot[]): Map<string, Shot> {
   return beans;
 }
 
+export function savedBeanName(beanNames: Iterable<string>, value: unknown): string | null {
+  const targetKey = beanKey(value);
+  if (!targetKey) return null;
+  for (const name of beanNames) {
+    if (beanKey(name) === targetKey) return name;
+  }
+  return null;
+}
+
 export function shotsForBean(shots: Shot[], beanName: string): Shot[] {
   const targetKey = beanKey(beanName);
   if (!targetKey) return [];

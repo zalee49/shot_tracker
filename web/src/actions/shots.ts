@@ -3,20 +3,23 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { insertShot, removeShot } from "@/lib/supabase";
-import { normalizeText } from "@/lib/shots";
+import { normalizeDate, normalizeText } from "@/lib/shots";
 import {
   ADJUSTMENT_OPTIONS,
   PROCESS_METHODS,
   ROAST_LEVELS,
 } from "@/lib/constants";
 
+const dateInputSchema = z.string().refine((value) => normalizeDate(value) === value);
+
 const shotInputSchema = z.object({
+  date: dateInputSchema,
   bean_name: z.string().transform(normalizeText),
   roaster: z.string(),
   origin: z.string(),
   roast_level: z.enum(ROAST_LEVELS),
   process_method: z.enum(PROCESS_METHODS),
-  roast_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  roast_date: dateInputSchema,
   dose: z.number().min(0).max(30),
   yield: z.number().min(0).max(100),
   brew_time: z.number().int().min(0).max(120),
@@ -47,16 +50,9 @@ export async function createShot(input: ShotInput): Promise<ActionResult> {
     return { ok: false, error: "Dose must be greater than zero." };
   }
 
-  const today = new Date();
-  const localDate = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
-
   try {
     await insertShot({
-      date: localDate,
+      date: shot.date,
       bean_name: shot.bean_name,
       roaster: shot.roaster,
       origin: shot.origin,

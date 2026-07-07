@@ -16,7 +16,7 @@ import {
   ratioScorePoints,
   scoreSeriesByBean,
 } from "@/lib/insights";
-import { shotsForBean, type Shot } from "@/lib/shots";
+import { savedBeanName, shotsForBean, type Shot } from "@/lib/shots";
 import { useTargetRatio } from "@/lib/useTargetRatio";
 import { ChartCard } from "./chart-theme";
 import { RatioScoreScatter } from "./RatioScoreScatter";
@@ -29,8 +29,12 @@ interface InsightsViewProps {
 }
 
 export function InsightsView({ shots, beanNames }: InsightsViewProps) {
-  const [selectedBean, setSelectedBean] = useState(beanNames[0]);
+  const [selectedBean, setSelectedBean] = useState(beanNames[0] ?? "");
   const [targetRatio] = useTargetRatio();
+  const activeBean = useMemo(
+    () => savedBeanName(beanNames, selectedBean) ?? beanNames[0] ?? "",
+    [beanNames, selectedBean],
+  );
 
   const scoreSeries = useMemo(() => {
     const byBean = scoreSeriesByBean(shots);
@@ -44,12 +48,12 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
   }, [shots, beanNames]);
 
   const beanShots = useMemo(
-    () => shotsForBean(shots, selectedBean),
-    [shots, selectedBean],
+    () => shotsForBean(shots, activeBean),
+    [shots, activeBean],
   );
   const stats = useMemo(() => beanStats(beanShots), [beanShots]);
   const beanColor =
-    SERIES_COLORS[Math.max(beanNames.indexOf(selectedBean), 0) % SERIES_COLORS.length];
+    SERIES_COLORS[Math.max(beanNames.indexOf(activeBean), 0) % SERIES_COLORS.length];
 
   const ratioTrend = useMemo(() => beanTrend(beanShots, "ratio", true), [beanShots]);
   const timeTrend = useMemo(() => beanTrend(beanShots, "brew_time"), [beanShots]);
@@ -76,7 +80,7 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
 
       <div className="space-y-2 pt-2">
         <Label htmlFor="insights-bean">Bean</Label>
-        <Select value={selectedBean} onValueChange={setSelectedBean}>
+        <Select value={activeBean} onValueChange={setSelectedBean}>
           <SelectTrigger id="insights-bean" className="h-11 w-full bg-card sm:w-72">
             <SelectValue />
           </SelectTrigger>
@@ -98,12 +102,12 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
 
       {!hasTrendData ? (
         <div className="rounded-xl border border-dashed border-input bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-          No valid recipe data is available for {selectedBean} yet.
+          No valid recipe data is available for {activeBean} yet.
         </div>
       ) : (
         <>
           <ChartCard
-            title={`${selectedBean} trends`}
+            title={`${activeBean} trends`}
             caption="Each metric in its real units, oldest to newest."
           >
             <div className="space-y-5">
@@ -140,7 +144,7 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
           {scatterPoints.length > 0 && (
             <ChartCard
               title="Brew ratio vs. score"
-              caption={`Each point is a ${selectedBean} shot — look for the ratio that clusters with your highest scores.`}
+              caption={`Each point is a ${activeBean} shot — look for the ratio that clusters with your highest scores.`}
             >
               <RatioScoreScatter points={scatterPoints} targetRatio={targetRatio} />
             </ChartCard>

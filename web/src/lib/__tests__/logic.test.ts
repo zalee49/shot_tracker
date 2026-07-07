@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { brewRatio, ratioFlag } from "../coaching";
 import { metricDeltas } from "../deltas";
 import { parseGrindSize } from "../grind";
+import { scoreSeriesByBean } from "../insights";
 import {
   beanKey,
   coerceNumber,
@@ -9,6 +10,7 @@ import {
   normalizeShot,
   normalizeText,
   previousShotsById,
+  savedBeanName,
   savedBeans,
   type Shot,
 } from "../shots";
@@ -106,6 +108,34 @@ describe("saved beans (port of get_saved_beans)", () => {
     expect(Array.from(beans.keys())).toEqual(["Kenya AA", "Colombia"]);
     expect(beans.get("Kenya AA")?.roaster).toBe("New Roaster");
     expect(beanKey("  Kenya  AA ")).toBe("kenya aa");
+  });
+
+  it("recovers the canonical saved bean display name", () => {
+    const beanNames = ["Kenya AA", "Colombia"];
+    expect(savedBeanName(beanNames, "  kenya   aa ")).toBe("Kenya AA");
+    expect(savedBeanName(beanNames, "Brazil")).toBeNull();
+    expect(savedBeanName(beanNames, "")).toBeNull();
+  });
+
+  it("supports stale selection fallbacks", () => {
+    const beanNames = ["Kenya AA", "Colombia"];
+    expect(savedBeanName(beanNames, "KENYA AA") ?? beanNames[0]).toBe("Kenya AA");
+    expect(savedBeanName(beanNames, "Brazil") ?? beanNames[0]).toBe("Kenya AA");
+    expect(savedBeanName(beanNames, "Brazil") ?? "__all__").toBe("__all__");
+  });
+});
+
+describe("insights series", () => {
+  it("combines score series by canonical bean name", () => {
+    const series = scoreSeriesByBean([
+      shot({ id: 3, date: "2026-07-03", bean_name: "Kenya AA", rating: 8 }),
+      shot({ id: 2, date: "2026-07-02", bean_name: "Colombia", rating: 7 }),
+      shot({ id: 1, date: "2026-07-01", bean_name: "kenya aa", rating: 6 }),
+    ]);
+
+    expect(Array.from(series.keys())).toEqual(["Kenya AA", "Colombia"]);
+    expect(series.get("Kenya AA")?.map((point) => point.rating)).toEqual([6, 8]);
+    expect(series.get("Kenya AA")?.every((point) => point.bean === "Kenya AA")).toBe(true);
   });
 });
 

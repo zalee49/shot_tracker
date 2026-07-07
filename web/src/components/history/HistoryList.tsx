@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { beanKey, type Shot } from "@/lib/shots";
+import { beanKey, savedBeanName, type Shot } from "@/lib/shots";
 import { useTargetRatio } from "@/lib/useTargetRatio";
 import { ShotCard } from "./ShotCard";
 
@@ -27,11 +27,15 @@ export function HistoryList({ shots, beanNames, previousById }: HistoryListProps
   const [search, setSearch] = useState("");
   const [beanFilter, setBeanFilter] = useState(ALL_BEANS);
   const [targetRatio] = useTargetRatio();
+  const activeBeanFilter = useMemo(() => {
+    if (beanFilter === ALL_BEANS) return ALL_BEANS;
+    return savedBeanName(beanNames, beanFilter) ?? ALL_BEANS;
+  }, [beanNames, beanFilter]);
 
   const filteredShots = useMemo(() => {
     let filtered = shots;
-    if (beanFilter !== ALL_BEANS) {
-      const filterKey = beanKey(beanFilter);
+    if (activeBeanFilter !== ALL_BEANS) {
+      const filterKey = beanKey(activeBeanFilter);
       filtered = filtered.filter((shot) => beanKey(shot.bean_name) === filterKey);
     }
     const query = search.trim().toLowerCase();
@@ -41,7 +45,7 @@ export function HistoryList({ shots, beanNames, previousById }: HistoryListProps
       );
     }
     return filtered;
-  }, [shots, search, beanFilter]);
+  }, [shots, search, activeBeanFilter]);
 
   return (
     <div>
@@ -56,7 +60,7 @@ export function HistoryList({ shots, beanNames, previousById }: HistoryListProps
             aria-label="Search history"
           />
         </div>
-        <Select value={beanFilter} onValueChange={setBeanFilter}>
+        <Select value={activeBeanFilter} onValueChange={setBeanFilter}>
           <SelectTrigger
             className="h-11 w-full bg-card sm:w-48"
             aria-label="Filter by bean"

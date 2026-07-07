@@ -158,6 +158,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
     }
 
     const input: ShotInput = {
+      date: todayISO(),
       bean_name: beanFields.name,
       roaster: beanFields.roaster,
       origin: beanFields.origin,
