@@ -1563,9 +1563,9 @@ with insights_tab:
         grind_df = df[df["date"].notna()].copy()
         grind_df["grind_value"] = grind_df["grind_size"].map(parse_grind_size)
         grind_df = grind_df[grind_df["grind_value"].notna()]
-        scatter_df = ratio_df[["date", "Brew Ratio"]].merge(
-            rating_df[["date", "rating"]], on="date", how="inner"
-        )
+        scatter_df = ratio_df[ratio_df["rating"].notna()][
+            ["date", "Brew Ratio", "rating"]
+        ].copy()
 
         if ratio_df.empty and brew_time_df.empty and rating_df.empty and grind_df.empty:
             st.markdown(
