@@ -29,9 +29,9 @@ export interface ShotsResult {
 }
 
 export async function fetchShots(): Promise<ShotsResult> {
-  const { url, key } = getConfig();
   let data: unknown;
   try {
+    const { url, key } = getConfig();
     const response = await fetch(shotsUrl(url, "?order=id.desc"), {
       headers: getHeaders(key),
       signal: AbortSignal.timeout(15000),
@@ -87,9 +87,9 @@ export async function insertShot(row: NewShotRow): Promise<void> {
 }
 
 export async function removeShot(shotId: number): Promise<{ ok: boolean; error?: string }> {
-  const { url, key } = getConfig();
   let deletedRows: unknown;
   try {
+    const { url, key } = getConfig();
     const response = await fetch(
       shotsUrl(url, `?id=eq.${shotId}&select=id`),
       {

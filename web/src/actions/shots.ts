@@ -20,9 +20,9 @@ const shotInputSchema = z.object({
   roast_level: z.enum(ROAST_LEVELS),
   process_method: z.enum(PROCESS_METHODS),
   roast_date: dateInputSchema,
-  dose: z.number().min(0).max(30),
-  yield: z.number().min(0).max(100),
-  brew_time: z.number().int().min(0).max(120),
+  dose: z.number().min(0.1).max(30),
+  yield: z.number().min(0.1).max(100),
+  brew_time: z.number().int().min(1).max(120),
   grind_size: z.string(),
   grind_direction: z.array(z.enum(ADJUSTMENT_OPTIONS)),
   temperature: z.number().min(80).max(100),
@@ -45,9 +45,6 @@ export async function createShot(input: ShotInput): Promise<ActionResult> {
   const shot = parsed.data;
   if (!shot.bean_name) {
     return { ok: false, error: "Add a bean name before logging this shot." };
-  }
-  if (shot.dose <= 0) {
-    return { ok: false, error: "Dose must be greater than zero." };
   }
 
   try {

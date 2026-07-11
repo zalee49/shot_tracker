@@ -35,6 +35,7 @@ import { AdjustmentChips } from "./AdjustmentChips";
 import { RatioCoach } from "./RatioCoach";
 
 const NEW_BEAN = "__new__";
+const DEFAULT_SCORE = 6;
 
 interface SavedBean {
   name: string;
@@ -128,7 +129,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
   );
   const [grindSize, setGrindSize] = useState(lastShot?.grind_size ?? "");
   const [adjustments, setAdjustments] = useState<string[]>([]);
-  const [rating, setRating] = useState(6);
+  const [rating, setRating] = useState(DEFAULT_SCORE);
   const [tastingNotes, setTastingNotes] = useState("");
 
   const isNewBean = beanChoice === NEW_BEAN;
@@ -148,12 +149,47 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
 
     const doseValue = parseInput(dose);
     const yieldValue = parseInput(yieldG);
+    const brewTimeValue = parseInput(brewTime);
+    const temperatureValue = parseInput(temperature);
     if (!beanFields.name.trim()) {
       toast.error("Add a bean name before logging this shot.");
       return;
     }
     if (doseValue === null || doseValue <= 0) {
       toast.error("Dose must be greater than zero.");
+      return;
+    }
+    if (doseValue > 30) {
+      toast.error("Dose must be 30g or less.");
+      return;
+    }
+    if (yieldValue === null || yieldValue <= 0) {
+      toast.error("Yield must be greater than zero.");
+      return;
+    }
+    if (yieldValue > 100) {
+      toast.error("Yield must be 100g or less.");
+      return;
+    }
+    if (brewTimeValue === null || brewTimeValue <= 0) {
+      toast.error("Brew time must be greater than zero.");
+      return;
+    }
+    const roundedBrewTime = Math.round(brewTimeValue);
+    if (roundedBrewTime <= 0) {
+      toast.error("Brew time must be at least 1 second.");
+      return;
+    }
+    if (roundedBrewTime > 120) {
+      toast.error("Brew time must be 120 seconds or less.");
+      return;
+    }
+    if (temperatureValue === null) {
+      toast.error("Add a valid brew temperature before logging this shot.");
+      return;
+    }
+    if (temperatureValue < 80 || temperatureValue > 100) {
+      toast.error("Brew temperature must be between 80°C and 100°C.");
       return;
     }
 
@@ -166,11 +202,11 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
       process_method: beanFields.processMethod as ShotInput["process_method"],
       roast_date: beanFields.roastDate,
       dose: doseValue,
-      yield: yieldValue ?? 0,
-      brew_time: Math.round(parseInput(brewTime) ?? 0),
+      yield: yieldValue,
+      brew_time: roundedBrewTime,
       grind_size: grindSize,
       grind_direction: adjustments as ShotInput["grind_direction"],
-      temperature: parseInput(temperature) ?? 93,
+      temperature: temperatureValue,
       rating,
       tasting_notes: tastingNotes,
     };
@@ -187,6 +223,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
         description: flag?.message,
       });
       setAdjustments([]);
+      setRating(DEFAULT_SCORE);
       setTastingNotes("");
       router.refresh();
     });
@@ -295,7 +332,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
             label="Dose (g)"
             value={dose}
             onChange={setDose}
-            min={0}
+            min={0.1}
             max={30}
             step={0.1}
           />
@@ -304,7 +341,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
             label="Yield (g)"
             value={yieldG}
             onChange={setYieldG}
-            min={0}
+            min={0.1}
             max={100}
             step={0.1}
           />
@@ -313,7 +350,7 @@ export function LogShotForm({ beans, lastShot, disabled }: LogShotFormProps) {
             label="Brew time (s)"
             value={brewTime}
             onChange={setBrewTime}
-            min={0}
+            min={1}
             max={120}
             step={1}
           />

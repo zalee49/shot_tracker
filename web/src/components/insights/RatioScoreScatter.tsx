@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatChartDate, type ScatterPoint } from "@/lib/insights";
+import { SCORE_DOMAIN, formatChartDate, type ScatterPoint } from "@/lib/insights";
 import { AXIS_TICK, ChartTooltipCard, GRID_PROPS } from "./chart-theme";
 
 interface RatioScoreScatterProps {
@@ -38,7 +38,7 @@ export function RatioScoreScatter({ points, targetRatio }: RatioScoreScatterProp
           dataKey="rating"
           type="number"
           name="Score"
-          domain={[0, 10]}
+          domain={[...SCORE_DOMAIN]}
           tickCount={6}
           tick={AXIS_TICK}
           tickLine={false}

@@ -1,6 +1,6 @@
 import { brewRatio } from "./coaching";
 import { parseGrindSize } from "./grind";
-import { beanKey, normalizeText, type Shot } from "./shots";
+import type { Shot } from "./shots";
 
 export const SERIES_COLORS = [
   "var(--chart-1)",
@@ -13,44 +13,12 @@ export const SERIES_COLORS = [
   "var(--chart-8)",
 ] as const;
 
+export const SCORE_DOMAIN = [1, 10] as const;
+
 export function dateMs(date: string | null): number | null {
   if (!date) return null;
   const [year, month, day] = date.split("-").map(Number);
   return new Date(year, month - 1, day).getTime();
-}
-
-export interface ScorePoint {
-  dateMs: number;
-  bean: string;
-  rating: number;
-}
-
-/** Rated shots per bean, oldest-first, for the all-beans score chart. */
-export function scoreSeriesByBean(shots: Shot[]): Map<string, ScorePoint[]> {
-  const displayNameByKey = new Map<string, string>();
-  for (const shot of shots) {
-    const name = normalizeText(shot.bean_name);
-    const key = beanKey(name);
-    if (key && !displayNameByKey.has(key)) displayNameByKey.set(key, name);
-  }
-
-  const seriesByKey = new Map<string, ScorePoint[]>();
-  for (const shot of [...shots].reverse()) {
-    const ms = dateMs(shot.date);
-    const key = beanKey(shot.bean_name);
-    const bean = displayNameByKey.get(key);
-    if (ms === null || shot.rating === null || !bean) continue;
-    const points = seriesByKey.get(key) ?? [];
-    points.push({ dateMs: ms, bean, rating: shot.rating });
-    seriesByKey.set(key, points);
-  }
-
-  const series = new Map<string, ScorePoint[]>();
-  for (const [key, points] of seriesByKey) {
-    const bean = displayNameByKey.get(key);
-    if (bean) series.set(bean, points);
-  }
-  return series;
 }
 
 export interface TrendPoint {

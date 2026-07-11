@@ -47,6 +47,7 @@ export function DeleteShotDialog({ shotId, beanName, dateLabel }: DeleteShotDial
           variant="ghost"
           size="sm"
           disabled={isPending}
+          aria-label={`Delete ${beanName} shot from ${dateLabel}`}
           className="gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="size-4" />
@@ -64,6 +65,7 @@ export function DeleteShotDialog({ shotId, beanName, dateLabel }: DeleteShotDial
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
+            aria-label={`Confirm delete ${beanName} shot from ${dateLabel}`}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
             Delete

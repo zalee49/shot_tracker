@@ -1,76 +1,69 @@
 # AGENTS.md
 
-Guidance for AI coding tools (Claude Code, Gemini, Cline, etc.) working in this repository.
+Guidance for AI coding tools working in this repository.
 
 ## What this is
 
-An espresso shot tracker ("Zach's Espresso Shot Tracker") with two apps sharing one Supabase
-Postgres table named `shots`, accessed over Supabase's PostgREST HTTP API:
+An espresso shot tracker ("Zach's Espresso Shot Tracker") backed by one Supabase Postgres table
+named `shots`, accessed over Supabase's PostgREST HTTP API.
 
 - **`web/`** — the production Next.js app (App Router + TypeScript + Tailwind + shadcn/ui +
   Recharts). This is the primary app going forward; see `web/README.md` for setup, env vars,
-  the read-public/write-gated access model, and Vercel deploy notes.
-- **`coffee_app.py`** — the original single-file Streamlit app, kept as-is for reference.
-  The sections below describe it.
+  the URL-private/no-login access model, and Vercel deploy notes.
+- **`coffee_app.py`** — the original single-file Streamlit app, kept as legacy reference only.
 
 ## Commands
 
+Run primary app commands from `web/`:
+
 ```bash
-streamlit run coffee_app.py          # run the app locally (opens on http://localhost:8501)
+npm run dev       # local app at http://localhost:3000
+npm test          # Vitest unit tests
+npm run lint      # ESLint
+npm run build     # production build and type check
 ```
 
-There is no `requirements.txt`, test suite, build step, or linter configured. Dependencies are
-`streamlit`, `pandas`, and `requests` — install them manually if the environment is fresh.
+The legacy Streamlit reference can still be launched manually if its Python dependencies are
+installed:
 
-## Secrets
-
-The app reads credentials via `st.secrets` (Streamlit). To run locally, create
-`.streamlit/secrets.toml` (gitignored, not in the repo) with:
-
-```toml
-SUPABASE_URL = "https://<project>.supabase.co"
-SUPABASE_KEY = "<supabase api key>"
+```bash
+streamlit run coffee_app.py
 ```
 
-`get_headers()` sends `SUPABASE_KEY` as both the `apikey` and `Bearer` token on every request.
+## Environment
+
+The production web app reads server-only env vars from `web/.env.local`:
+
+```bash
+SUPABASE_URL="https://<project>.supabase.co"
+SUPABASE_KEY="<supabase anon key>"
+```
+
+Use `web/.env.example` as the safe template. Do not add `NEXT_PUBLIC_` to these variables; all
+Supabase requests should stay in server components, server actions, or `src/lib/supabase.ts`.
 
 ## Architecture
 
-The whole app is `coffee_app.py`, structured as: helper functions at the top, then a single
-top-to-bottom Streamlit script body (Header → Settings → Log form → Shot History → Trends) that
-re-executes on every interaction.
-
-- **Data layer** — `load_data`, `save_shot`, `delete_shot` are thin `requests` calls against
-  `{SUPABASE_URL}/rest/v1/shots`. PostgREST query syntax is used directly in the URL
-  (e.g. `?order=id.desc`, `?id=eq.{shot_id}`). There is no ORM or schema definition in the repo;
-  the `shots` table is defined in Supabase. The implicit row shape is whatever `save_shot` sends:
-  `date, bean_name, roaster, origin, roast_level, process_method, roast_date, dose, yield,
-  brew_time, grind_size, grind_direction, temperature, rating, tasting_notes` (plus `id`).
-
-- **Bean reuse** — `get_saved_beans` derives a deduplicated bean list from existing shots (most
-  recent wins per `bean_name`), powering the "Select Bean" dropdown and "Quick Log Mode" so you
-  can re-log a shot for a known bean without re-entering bean metadata.
-
-- **Brew-ratio coaching** — `ratio_flag` compares `yield / dose` against the user's target ratio
-  (session-state `target_ratio`, default 2.0) and returns on-target / over / under guidance.
-  This is the app's core domain logic and is reused in both the log-confirmation message and each
-  history entry.
-
-- **State & refresh** — no caching; `load_data()` runs on every rerun. After a save or delete the
-  code calls `st.rerun()` to refetch. Settings persist only within the session via
-  `st.session_state`.
-
-- **Theming** — coffee-colored palette in `.streamlit/config.toml`; the header logo is inline SVG
-  rendered with `unsafe_allow_html=True`.
+- **Web app** — `web/src/app` contains App Router pages for logging, history, and insights.
+  `web/src/components` contains the UI, and `web/src/lib` contains Supabase access, shot
+  normalization, coaching, deltas, and insights helpers.
+- **Data layer** — `web/src/lib/supabase.ts` is the server-only PostgREST boundary. It normalizes
+  database rows with `normalizeShot`, keeps malformed rows visible through skipped-row banners,
+  and returns friendly outage errors so writes can be disabled when reads fail.
+- **Server actions** — `web/src/actions/shots.ts` validates shot creation/deletion and revalidates
+  `/`, `/history`, and `/insights` after successful writes.
+- **Access model** — this is a personal URL-private app with no login. Anyone with the deployed URL
+  can browse, log, and delete shots, so do not document or assume an auth/write gate unless one is
+  explicitly added.
+- **Legacy Streamlit** — `coffee_app.py` remains useful for historical behavior comparisons, but new
+  fixes should target `web/` unless the user asks otherwise.
 
 ## Standing rules
 
 1. **Follow existing project conventions.** Match the surrounding code's style: formatting, naming,
    structure, import ordering, error handling. Consistency with the existing code beats personal
    defaults. Prefer clear, explicit names over clever/condensed code. Do not add dependencies,
-   abstractions, or configuration the task did not require. Note this codebase's conventions:
-   plain top-to-bottom Streamlit script, small module-level helper functions, no classes, and
-   trailing-underscore for the `yield_` reserved word.
+   abstractions, or configuration the task did not require.
 
 2. **Be concise, don't over-explain.** Don't explain standard, well-known patterns unless asked.
    Focus commentary on non-obvious parts or real decisions. If a change is effectively identical to

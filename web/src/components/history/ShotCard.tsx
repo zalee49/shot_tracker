@@ -80,7 +80,10 @@ export function ShotCard({ shot, previousShot, targetRatio }: ShotCardProps) {
       </div>
 
       <Collapsible>
-        <CollapsibleTrigger className="group flex w-full items-center justify-center gap-1 border-t border-border py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
+        <CollapsibleTrigger
+          aria-label={`Show details for ${beanName} shot from ${displayDate(shot.date)}`}
+          className="group flex w-full items-center justify-center gap-1 border-t border-border py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+        >
           Details
           <ChevronDown className="size-3.5 transition-transform group-data-[state=open]:rotate-180" />
         </CollapsibleTrigger>

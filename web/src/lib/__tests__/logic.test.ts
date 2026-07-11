@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { brewRatio, ratioFlag } from "../coaching";
 import { metricDeltas } from "../deltas";
 import { parseGrindSize } from "../grind";
-import { scoreSeriesByBean } from "../insights";
+import { SCORE_DOMAIN } from "../insights";
 import {
   beanKey,
   coerceNumber,
@@ -126,16 +126,8 @@ describe("saved beans (port of get_saved_beans)", () => {
 });
 
 describe("insights series", () => {
-  it("combines score series by canonical bean name", () => {
-    const series = scoreSeriesByBean([
-      shot({ id: 3, date: "2026-07-03", bean_name: "Kenya AA", rating: 8 }),
-      shot({ id: 2, date: "2026-07-02", bean_name: "Colombia", rating: 7 }),
-      shot({ id: 1, date: "2026-07-01", bean_name: "kenya aa", rating: 6 }),
-    ]);
-
-    expect(Array.from(series.keys())).toEqual(["Kenya AA", "Colombia"]);
-    expect(series.get("Kenya AA")?.map((point) => point.rating)).toEqual([6, 8]);
-    expect(series.get("Kenya AA")?.every((point) => point.bean === "Kenya AA")).toBe(true);
+  it("uses the stored score range for score charts", () => {
+    expect(SCORE_DOMAIN).toEqual([1, 10]);
   });
 });
 

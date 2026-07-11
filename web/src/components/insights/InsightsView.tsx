@@ -11,16 +11,15 @@ import {
 } from "@/components/ui/select";
 import {
   SERIES_COLORS,
+  SCORE_DOMAIN,
   beanStats,
   beanTrend,
   ratioScorePoints,
-  scoreSeriesByBean,
 } from "@/lib/insights";
 import { savedBeanName, shotsForBean, type Shot } from "@/lib/shots";
 import { useTargetRatio } from "@/lib/useTargetRatio";
 import { ChartCard } from "./chart-theme";
 import { RatioScoreScatter } from "./RatioScoreScatter";
-import { ScoreOverTimeChart } from "./ScoreOverTimeChart";
 import { TrendChart } from "./TrendChart";
 
 interface InsightsViewProps {
@@ -35,17 +34,6 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
     () => savedBeanName(beanNames, selectedBean) ?? beanNames[0] ?? "",
     [beanNames, selectedBean],
   );
-
-  const scoreSeries = useMemo(() => {
-    const byBean = scoreSeriesByBean(shots);
-    return beanNames
-      .map((bean, index) => ({
-        bean,
-        points: byBean.get(bean) ?? [],
-        color: SERIES_COLORS[index % SERIES_COLORS.length],
-      }))
-      .filter((entry) => entry.points.length > 0);
-  }, [shots, beanNames]);
 
   const beanShots = useMemo(
     () => shotsForBean(shots, activeBean),
@@ -69,16 +57,7 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
 
   return (
     <div className="space-y-4">
-      {scoreSeries.length > 0 && (
-        <ChartCard
-          title="Score over time — all beans"
-          caption="Every rated shot, colored by bean, to track overall progress."
-        >
-          <ScoreOverTimeChart series={scoreSeries} />
-        </ChartCard>
-      )}
-
-      <div className="space-y-2 pt-2">
+      <div className="space-y-2">
         <Label htmlFor="insights-bean">Bean</Label>
         <Select value={activeBean} onValueChange={setSelectedBean}>
           <SelectTrigger id="insights-bean" className="h-11 w-full bg-card sm:w-72">
@@ -130,7 +109,7 @@ export function InsightsView({ shots, beanNames }: InsightsViewProps) {
                 color={beanColor}
                 format={(value) => String(Math.round(value * 10) / 10)}
                 showRolling
-                domain={[0, 10]}
+                domain={[...SCORE_DOMAIN]}
               />
               <TrendChart
                 title="Grind size"
